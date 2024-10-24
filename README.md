@@ -69,6 +69,41 @@ bash
 Copiar código
 php artisan key:generate
 
+--------------------CONFIGURACIONES IMPORTANTES--------------------
+Para poder inicializar el proyecto debemos generar unos permisos en postgres
+-- Crear el usuario con su contraseña
+CREATE USER gogreenchain_user WITH PASSWORD 'jkjrytuf*53sd';
+
+-- Conceder permisos de conexión a la base de datos
+GRANT CONNECT ON DATABASE gogreenchain TO gogreenchain_user;
+
+-- Conceder todos los privilegios en la base de datos
+GRANT ALL PRIVILEGES ON DATABASE gogreenchain TO gogreenchain_user;
+
+-- Conceder permisos para usar el esquema public
+GRANT USAGE ON SCHEMA public TO gogreenchain_user;
+
+-- Conceder permisos de SELECT, INSERT, UPDATE, DELETE en todas las tablas del esquema public
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO gogreenchain_user;
+
+-- Conceder permisos de USAGE y UPDATE en todas las secuencias del esquema public
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO gogreenchain_user;
+GRANT UPDATE ON ALL SEQUENCES IN SCHEMA public TO gogreenchain_user;
+
+-- Conceder permisos para crear tablas en el esquema public
+GRANT CREATE ON SCHEMA public TO gogreenchain_user;
+
+-- También puedes conceder todos los privilegios en el esquema public
+GRANT ALL PRIVILEGES ON SCHEMA public TO gogreenchain_user;
+
+Dentro de nuestro .env debemos ingresar las siguientes credenciales:
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=gogreenchain
+DB_USERNAME=gogreenchain_user
+DB_PASSWORD=jkjrytuf*53sd
+
 bash
 Copiar código
 php artisan serve
