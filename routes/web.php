@@ -47,7 +47,6 @@ Route::middleware([
 
 //Grupo de rutas prefijas con admin para el controlador de Rol
 Route::prefix('admin/roles')->middleware(['auth', 'can:Administrador'])->group(function () {
-   
 });
 
 
@@ -62,6 +61,7 @@ Route::prefix('usuario/perfil')->middleware(['auth', 'can:Usuario'])->group(func
     Route::get('/mi_perfil', [UsuarioControlador::class, 'show'])->name('usuario.perfil.mi_perfil');
     Route::put('/mi_perfil/{id}', [UsuarioControlador::class, 'update'])->name('usuario.perfil.actualizar');
 
+    
 });
 
 

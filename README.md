@@ -1,4 +1,4 @@
-Proyecto de Gestión de Tareas con Recompensas
+GoGreenChain
 Este proyecto es una plataforma de gestión de tareas enfocada en acciones medioambientales y comunitarias. Los usuarios pueden registrarse, realizar tareas como reciclaje o limpieza, y recibir recompensas en tokens. Está diseñado para empresas que desean asignar tareas a usuarios y para usuarios que buscan obtener recompensas por su contribución.
 
 Características
@@ -92,4 +92,3 @@ Las contribuciones son bienvenidas. Por favor, sigue los pasos de pull request y
 
 Licencia
 Este proyecto está bajo la Licencia MIT. Consulta el archivo LICENSE para más detalles.
-
