@@ -25,7 +25,11 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+
+     *
+     * @return void
+     */
+    public function down()
     {
         Schema::dropIfExists('failed_jobs');
     }
