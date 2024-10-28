@@ -27,12 +27,13 @@ return new class extends Migration
             $table->string('state'); // Estado
             $table->string('phone'); // Número de teléfono
             $table->string('postal_code'); // Código Postal
+            $table->string('location');
             $table->string('username_wallet'); //Nombre del usuario del wallet
             $table->string('id_wallet'); //ID del wallet
             $table->boolean('active')->default(true); // Estado de la empresa
             $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();
-            $table->string('profile_photo_path', 2048)->nullable();
+            $table->string('profile_photo_path', 2048)->nullable(); 
             $table->foreign('id_rol')->references('id_rol')->on('rol');
             $table->timestamps();
         });
@@ -54,6 +55,7 @@ return new class extends Migration
                 'state' => 'Estado Admin',
                 'phone' => '1122334455',   
                 'postal_code' => '54321',
+                'location' => '21.800174588382458, -105.20558786763493',
                 'username_wallet' => 'admin_wallet',
                 'id_wallet' => 'wallet_1'    
             ]);
@@ -70,6 +72,7 @@ return new class extends Migration
                 'state' => 'Estado Empresa',
                 'phone' => '1122334455',
                 'postal_code' => '54321',
+                'location' => '21.800174588382458, -105.20558786763493',
                 'username_wallet' => 'empresa_wallet',
                 'id_wallet' => 'wallet_2'    
             ]);
@@ -86,6 +89,7 @@ return new class extends Migration
                 'state' => 'Estado Usuario',
                 'phone' => '1122334455', 
                 'postal_code' => '54321',
+                'location' => '21.800174588382458, -105.20558786763493',
                 'username_wallet' => 'usuario_wallet',
                 'id_wallet' => 'wallet_3'    
             ]);

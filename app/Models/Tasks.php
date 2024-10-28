@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Tasks extends Model
 {
@@ -14,7 +15,8 @@ class Tasks extends Model
 
     // Definir los campos que se pueden asignar masivamente (fillable)
     protected $fillable = [
-        'id_user', 
+        'id_empresa',
+        'id_usuario', 
         'title',
         'description', 
         'start_date', 
@@ -28,9 +30,18 @@ class Tasks extends Model
     /**
      * Relación: una tarea pertenece a un usuario.
      */
-    public function user()
+ 
+    public function usuario(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'id_usuario');
+    }
+
+    /**
+     * Relación: una tarea pertenece a una empresa que la crea.
+     */
+    public function empresa(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_empresa');
     }
 
     /**

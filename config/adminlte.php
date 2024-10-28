@@ -64,7 +64,7 @@ return [
     */
 
     'logo' => '<b>GoGreen</b>Chain',
-    'logo_img' => '/storage/gogreenchain.jpg',
+    'logo_img' => '/storage/gogreenchain.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
@@ -108,11 +108,11 @@ return [
     'preloader' => [
         'enabled' => false,
         'img' => [
-            'path' => '/storage/GoGreenChain.png',
+            'path' => '/storage/gogreenchain.png',
             'alt' => 'AdminLTE Preloader Image',
             'effect' => 'animation__shake',
-            'width' => 60,
-            'height' => 60,
+            'width' => 100,
+            'height' => 100,
         ],
     ],
 
@@ -327,19 +327,19 @@ return [
         [
             'text' => 'Ver tareas',
             'icon'    => 'fas fa-fw fa-tasks',
-            'url'  => 'usuario/cobros/gestion_contratos',
+            'url'  => 'usuario/perfil/ver_tareas',
             'can' => 'Usuario',
         ], 
         [
             'text' => 'Mis tareas',
             'icon'    => 'fas fa-fw fa-spinner',
-            'url'  => 'usuario/cobros/gestion_contratos',
+            'url'  => 'usuario/perfil/mis_tareas',
             'can' => 'Usuario',
         ], 
         [
             'text' => 'Mi historial',
             'icon'    => 'fas fa-fw fa-history',
-            'url'  => 'usuario/cobros/gestion_contratos',
+            'url'  => 'usuario/perfil/mi_historial_tareas',
             'can' => 'Usuario',
         ], 
 

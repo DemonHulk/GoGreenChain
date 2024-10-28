@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -34,11 +35,13 @@ class User extends Authenticatable
         'address',
         'city',
         'state',
-        'phone',
         'postal_code',
+        'phone',
+        'location',
         'username_wallet',
         'id_wallet',
-        'active'
+        'active',
+        'profile_photo_path'
     ];
 
     /**
@@ -67,12 +70,29 @@ class User extends Authenticatable
         return $this->belongsTo(RolModelo::class, 'id_rol');
     }
 
-    public function tasks()
+    public function tasks(): HasMany
 {
-    return $this->hasMany(Tasks::class, 'id_user');
+    return $this->hasMany(Tasks::class, 'id_empresa'); 
+}
+public function tasks_as_empresa(): HasMany
+{
+    return $this->hasMany(Tasks::class, 'id_empresa');
+}
+
+/**
+ * Relación: usuario como el que acepta las tareas.
+ */
+public function tasks_as_usuario(): HasMany
+{
+    return $this->hasMany(Tasks::class, 'id_usuario');
 }
 
 
+
+public function tasks_usuario()
+{
+    return $this->hasMany(Tasks::class, 'id_usuario');
+}
 
     /**
      * The accessors to append to the model's array form.

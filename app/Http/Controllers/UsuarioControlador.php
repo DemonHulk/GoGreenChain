@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Log;
 
 class UsuarioControlador extends Controller
 {
@@ -20,7 +21,8 @@ class UsuarioControlador extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(){
+    public function index()
+    {
             // Obtener el usuario autenticado
         $user = Auth::user();
 
@@ -31,6 +33,45 @@ class UsuarioControlador extends Controller
 
         return view('usuario.index', compact('user', 'balance'));
     }
+    
+    
+    public function ver_tareas_usuario()
+    {
+        // Obtener el usuario autenticado
+    $user = Auth::user();
+
+    // Retornar una vista con los datos del usuario
+
+    return view('usuario.perfil.ver_tareas', compact('user'));
+    }
+
+    public function mis_tareas_usuario()
+    {
+        // Obtener el usuario autenticado
+    $user = Auth::user();
+
+    // Retornar una vista con los datos del usuario 
+
+    return view('usuario.perfil.mis_tareas', compact('user'));
+    }
+        
+    public function mi_historial_usuario()
+    {
+        // Obtener el usuario autenticado
+    $user = Auth::user();
+
+    // Retornar una vista con los datos del usuario 
+
+    return view('usuario.perfil.mi_historial_tareas', compact('user'));
+    }
+
+
+
+
+
+
+
+    
 
     public function getNearBalance($walletUsername)
     {
@@ -67,91 +108,40 @@ class UsuarioControlador extends Controller
         }
     }
 
-    public function sendNear(Request $request)
-    {
-        // Validar la entrada del formulario
-        $request->validate([
-            'recipient' => 'required|string',
-            'amount' => 'required|numeric|min:0.01', // Mínimo 0.01 NEAR
+    public function prepareTransfer(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'to_address' => 'required|string',
+            'amount' => 'required|numeric|min:0.000001',
         ]);
-    
-        $user = Auth::user();
-        $privateKey = 'YOUR_PRIVATE_KEY_HERE'; // Obtén la clave privada de manera segura
-        $publicKey = 'YOUR_PUBLIC_KEY_HERE'; // Clave pública del usuario
-    
-        // Convertir NEAR a yoctoNEAR
-        $amountInYocto = bcmul($request->amount, '1000000000000000000000000', 0); // 1 NEAR = 10^24 yoctoNEAR
-    
-        // Obtener el nonce actual
-        $nonce = $this->getNonce($user->username_wallet);
-    
-        // Realizar la solicitud a la API de Near
-        $url = "https://rpc.testnet.near.org";
-        $client = new Client();
-    
-        try {
-            $response = $client->post($url, [
-                'json' => [
-                    "jsonrpc" => "2.0",
-                    "id" => "dontcare",
-                    "method" => "broadcast_tx_commit",
-                    "params" => [
-                        "signed_transaction" => $this->createTransaction($user->username_wallet, $request->recipient, $amountInYocto, $privateKey, $publicKey, $nonce)
-                    ]
-                ]
-            ]);
-    
-            $data = json_decode($response->getBody(), true);
-    
-            if (isset($data['error'])) {
-                return redirect()->back()->withErrors(['msg' => 'Error al enviar: ' . $data['error']['message']]);
-            }
-    
-            return redirect()->back()->with('success', 'Transacción exitosa. Hash: ' . $data['result']['transaction']['hash']);
-        } catch (RequestException $e) {
-            return redirect()->back()->withErrors(['msg' => 'Error al enviar: ' . $e->getMessage()]);
+
+        // Supongamos que tienes una función que verifica el saldo del usuario.
+        $currentBalance = $this->getUserBalance(); // Implementa esta función según tu lógica
+
+        if ($validated['amount'] > $currentBalance) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Saldo insuficiente para realizar la transferencia.'
+            ], 422);
         }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'to_address' => $validated['to_address'],
+                'amount' => $validated['amount']
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 422);
     }
-    
-    private function createTransaction($sender, $recipient, $amountInYocto, $privateKey, $publicKey, $nonce)
-    {
-        // Debes implementar la firma de la transacción aquí
-        return [
-            "receiver_id" => $recipient,
-            "amount" => $amountInYocto,
-            "gas" => "100000000000000", // Establece un límite de gas
-            "nonce" => $nonce, // Usa el nonce actual
-            "public_key" => $publicKey,
-            // Agrega aquí el resto de la transacción, incluyendo la firma
-        ];
-    }
-    
-    public function getNonce($walletUsername)
-    {
-        $client = new Client();
-        $url = "https://rpc.testnet.near.org";
-    
-        try {
-            $response = $client->post($url, [
-                'json' => [
-                    "jsonrpc" => "2.0",
-                    "id" => "dontcare",
-                    "method" => "query",
-                    "params" => [
-                        "request_type" => "view_account",
-                        "finality" => "final",
-                        "account_id" => $walletUsername
-                    ]
-                ]
-            ]);
-    
-            $data = json_decode($response->getBody(), true);
-            // El nonce es el número de veces que ha enviado transacciones
-            return $data['result']['nonce'];
-        } catch (\Exception $e) {
-            return 0; // Devuelve 0 si hay un error al obtener el nonce
-        }
-    }
+}
+
+
     
 
 
@@ -191,7 +181,7 @@ class UsuarioControlador extends Controller
 
         // Crear una nueva tarea con los datos validados
         Tasks::create([
-            'id_user' => auth()->id(), // Asumiendo que el usuario está autenticado
+            'id_empresa' => auth()->id(), // Asumiendo que el usuario está autenticado
             'title' => $request->input('title'),
             'description' => $request->input('description'),
             'start_date' => $request->input('start_date'),
@@ -205,28 +195,86 @@ class UsuarioControlador extends Controller
         // Redirigir al usuario con un mensaje de éxito
         return redirect()->route('empresa.perfil.ver_tareas')->with('success', 'Tarea publicada correctamente');
     }
-
-    public function ver_tareas()
+    public function ver_tareas(Request $request)
     {
         // Obtener el usuario autenticado
         $user = Auth::user();
     
-        // Obtener las tareas del usuario
-        $tasks = $user->tasks; // Asumiendo que tienes una relación definida entre Usuario y Tarea
+        // Obtener todas las tareas
+        $tasks = Tasks::all();
     
-        // Retornar la vista con las tareas
-        return view('empresa.perfil.ver_tareas', compact('user', 'tasks'));
+        // Contar tareas según el estado
+        $pendingUnassignedCount = $tasks->where('status', 'pending')->whereNull('id_usuario')->count();
+        $pendingAssignedCount = $tasks->where('status', 'pending')->whereNotNull('id_usuario')->count();
+        $completedCount = $tasks->where('status', 'completed')->whereNotNull('id_usuario')->count();
+    
+        // Aplicar filtro según el estado seleccionado
+        $filteredTasks = Tasks::query();
+        if ($request->filled('status')) {
+            switch ($request->status) {
+                case 'pending_unassigned':
+                    $filteredTasks->where('status', 'pending')->whereNull('id_usuario');
+                    break;
+                case 'pending_assigned':
+                    $filteredTasks->where('status', 'pending')->whereNotNull('id_usuario');
+                    break;
+                case 'completed':
+                    $filteredTasks->where('status', 'completed')->whereNotNull('id_usuario');
+                    break;
+            }
+        }
+    
+        // Obtener las tareas filtradas
+        $tasks = $filteredTasks->get();
+    
+        return view('empresa.perfil.ver_tareas', compact(
+            'user',
+            'tasks',
+            'pendingUnassignedCount',
+            'pendingAssignedCount',
+            'completedCount'
+        ));
     }
     
-    public function mi_empresa()
+    public function mi_empresa(Request $request)
     {
         // Obtener el usuario autenticado
         $user = Auth::user();
+        
+        // Iniciar la consulta correctamente para obtener las tareas donde id_empresa es el id del usuario actual
+        $tasks = Tasks::where('id_empresa', $user->id);
+        
+        // Filtrar por estado si se especifica y no está vacío
+        if ($request->filled('status')) {
+            $tasks->where('status', $request->status);
+        }
+        
+        // Obtener todas las tareas
+        $allTasks = $tasks->get();
+        
+        // Separar las tareas en activas y completadas
+        $activeTasks = $allTasks->where('status', 'pending');
+        $completedTasks = $allTasks->where('status', 'completed');
+        
+        // Retornar una vista con los datos del usuario y las tareas
+        return view('empresa.perfil.mi_empresa', compact('user', 'activeTasks', 'completedTasks'));
+    }
+    
+        
 
-        // Retornar una vista con los datos del usuario y el balance
-        return view('empresa.perfil.mi_empresa', compact('user'));
+    
+    // Método para obtener los detalles de una tarea por ID
+    public function obtenerTarea($id)
+    {
+        // Buscar la tarea con el ID proporcionado
+        $task = Tasks::findOrFail($id);
+
+        // Devolver la tarea como JSON
+        return response()->json($task);
     }
 
+    
+    
     public function create()
     {
         $roles = RolModelo::all();
@@ -251,8 +299,15 @@ class UsuarioControlador extends Controller
                 'postal_code' => 'required|string|regex:/^\d{5}$/',
                 'phone' => 'required|string|regex:/^\d{10}$/',
                 'username_wallet' => 'nullable|string',
-                'id_wallet' => 'nullable|string'
+                'id_wallet' => 'nullable|string',
+                'profile_photo_path' => 'required|image|max:1024'
                 ]);
+
+                // Procesamos la imagen y obtenemos la ruta
+                $profilePhotoPath = null;
+                if (request()->hasFile('profile_photo_path')) {
+                    $profilePhotoPath = request()->file('profile_photo_path')->store('profile_photos', 'public'); // Guardar la imagen en 'storage/app/public/profile_photos'
+                }
     
             // Crear y guardar el usuario
             $usuario = new User();
@@ -268,6 +323,7 @@ class UsuarioControlador extends Controller
             $usuario->rfc = $request->input('rfc');
             $usuario->username_wallet = $request->input('username_wallet');
             $usuario->id_wallet = $request->input('id_wallet');
+            $usuario->profile_photo_path = $profilePhotoPath;
             $usuario->id_rol = $request->input('id_rol');
             $usuario->save();
     
@@ -306,25 +362,30 @@ class UsuarioControlador extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'email' => 'required|email',
+            'name' => 'required|string',
+            'username_wallet' => 'required|string',
             'address' => 'required|string',
             'city' => 'required|string',
             'state' => 'required|string',
             'postal_code' => 'required|string',
             'phone' => 'required|string',
+            'location' => 'required|string', // Validación para la ubicación
         ]);
     
         $user = User::find($id);
-        $user->email = $request->email;
+        $user->name = $request->name;
+        $user->username_wallet = $request->username_wallet;
         $user->address = $request->address;
         $user->city = $request->city;
         $user->state = $request->state;
         $user->postal_code = $request->postal_code;
         $user->phone = $request->phone;
+        $user->location = $request->location; // Guardar ubicación
         $user->save();
     
         return redirect()->back()->with('success', 'Datos actualizados con éxito');
     }
+    
     
 
     public function actualizar_empresa(Request $request, $id)
@@ -336,8 +397,9 @@ class UsuarioControlador extends Controller
             'state' => 'required|string',
             'postal_code' => 'required|string',
             'phone' => 'required|string',
+            'location' => 'required|string', // Validación para la ubicación
         ]);
-    
+
         $user = User::find($id);
         $user->email = $request->email;
         $user->address = $request->address;
@@ -345,10 +407,12 @@ class UsuarioControlador extends Controller
         $user->state = $request->state;
         $user->postal_code = $request->postal_code;
         $user->phone = $request->phone;
+        $user->location = $request->location; // Guardar ubicación
         $user->save();
-    
+
         return redirect()->back()->with('success', 'Datos actualizados con éxito');
     }
+
     
 
     /**
@@ -359,4 +423,5 @@ class UsuarioControlador extends Controller
     {
        
     }
+    
 }

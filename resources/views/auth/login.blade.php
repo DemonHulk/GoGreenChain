@@ -2,7 +2,7 @@
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gradient-to-r from-green-50 to-blue-50">
         <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
             <div class="flex justify-center mb-8">
-                <img src="{{ asset('/storage/gogreenchain.jpg') }}" class="w-64 h-auto" alt="GoGreenChain Logo">
+                <img src="{{ asset('/storage/gogreenchain.png') }}" class="w-64 h-auto" alt="GoGreenChain Logo">
             </div>
 
             <h2 class="text-center text-2xl font-bold text-gray-700 mb-8">

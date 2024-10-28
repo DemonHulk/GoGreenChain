@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_user')->constrained('users')->onDelete('cascade'); // Relación con el usuario que crea la tarea
+            $table->foreignId('id_empresa')->constrained('users')->onDelete('cascade');
+            $table->foreignId('id_usuario')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('title'); // nombre de la tarea
             $table->string('description'); // Descripción de la tarea
             $table->date('start_date'); // Fecha de inicio
