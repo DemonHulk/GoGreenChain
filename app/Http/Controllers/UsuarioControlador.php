@@ -474,5 +474,12 @@ class UsuarioControlador extends Controller
     {
        
     }
+
+    public function near_vista()
+    {
+
+        // Retornar una vista con los datos del usuario y el balance
+        return view('empresa.walletNear.near');
+    }
     
 }

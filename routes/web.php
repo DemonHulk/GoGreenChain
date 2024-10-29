@@ -95,3 +95,11 @@ Route::prefix('empresa/perfil')->middleware(['auth', 'can:Empresa'])->group(func
 
 });
 
+//Grupo de rutas prefijas con Empresa para el controlador de Rol
+Route::prefix('empresa/walletNear')->middleware(['auth', 'can:Empresa'])->group(function () {
+
+
+    Route::get('/near', [UsuarioControlador::class, 'near_vista'])->name('empresa.walletNear.near');
+
+
+});
