@@ -19,8 +19,13 @@
             <!-- Balance Amount -->
             <div class="text-center mb-5">
                 <h2 class="display-4 font-weight-bold mb-4 sinsesion"> INICIA SESIÓN </h2>
+                <h2 class="display-4 font-weight-bold mb-4 " id="cargando"> CARGANDO WALLET... </h2>
                 <h2 class="display-4 font-weight-bold mb-4 sesion"> <span id="cuenta"></span> </h2>
-                <h2 class="display-4 font-weight-bold mb-4 sesion"> <span id="balance"></span> NEAR </h2>
+                <h2 class="display-4 font-weight-bold mb-4 sesion"> <span id="balance"></span>  </h2>
+                <h2 class="display-4 font-weight-bold mb-4 sesion"> <span id="balanceMXN"></span>  </h2>
+                <h3 class="display-6 font-weight-bold mb-4 sesion"> <span id="valorMXNNEar"></span>  </h3>
+
+
 
                 <p class="text-muted sesion">
                     Balance disponible
@@ -52,6 +57,27 @@
     <button id="send-payment-button">Enviar Pago</button>
     <div id="payments"></div>
     <script>
+        async function getNearMXN() {
+            var sesion = document.getElementsByClassName('sesion');
+            for (var i = 0; i < sesion.length; i++) {
+                sesion[i].style.display = 'none';
+            }
+            try {
+                const response = await fetch(
+                'https://api.coingecko.com/api/v3/simple/price?ids=near&vs_currencies=mxn');
+                const data = await response.json();
+                localStorage.setItem('nearmxn', data.near.mxn);
+                for (var i = 0; i < sesion.length; i++) {
+                    sesion[i].style.display = 'block';
+                }
+                return data.near.mxn;
+            } catch (error) {
+                for (var i = 0; i < sesion.length; i++) {
+                    sesion[i].style.display = 'block';
+                }
+                return localStorage.getItem('nearmxn');
+            }
+        }
         const config = {
             networkId: 'testnet',
             keyStore: new nearApi.keyStores.BrowserLocalStorageKeyStore(),
@@ -62,6 +88,15 @@
         };
 
         async function initNear() {
+            var sesion = document.getElementsByClassName('sesion');
+            var sinsesion = document.getElementsByClassName('sinsesion');
+            for (var i = 0; i < sesion.length; i++) {
+                sesion[i].style.display = 'none';
+            }
+
+            for (var i = 0; i < sinsesion.length; i++) {
+                sinsesion[i].style.display = 'none';
+            }
             const near = await nearApi.connect(config);
             const wallet = new nearApi.WalletConnection(near, 'mi-app'); // Prefijo genérico para la app
             return wallet;
@@ -76,16 +111,13 @@
 
                 // Verificar si el balance es suficiente
                 if (parseFloat(availableBalance) < parseFloat(amount)) {
-                    document.getElementById('status').textContent = 'Error: Balance insuficiente.';
+                    alert('Error: Balance insuficiente.');
                     return;
                 }
 
                 const result = await account.sendMoney(receiverAccountId, nearApi.utils.format.parseNearAmount(amount));
                 console.log('Resultado de la transacción:', result);
 
-                // Mostrar mensaje de éxito al usuario
-                document.getElementById('status').textContent =
-                    'Transacción realizada con éxito. ID de la transacción: ' + result.transaction_outcome.id;
 
                 // Enviar detalles de la transacción al backend
                 const response = await fetch('/log-transaction', {
@@ -106,7 +138,6 @@
 
             } catch (error) {
                 console.error('Error en la transacción:', error);
-                document.getElementById('status').textContent = 'Error en la transacción: ' + error.message;
             }
         }
 
@@ -115,6 +146,14 @@
             const cuenta = prompt('A quien enviar:');
             const tarea = prompt('Porque:');
             const cantidad = prompt('cuanto:');
+
+            const balance = await account.getAccountBalance();
+            const availableBalance = nearApi.utils.format.formatNearAmount(balance.available);
+
+            if (parseFloat(availableBalance) < parseFloat(cantidad)) {
+                alert('Error: Balance insuficiente.');
+                return;
+            }
 
             try {
                 const result = await account.functionCall({
@@ -128,15 +167,17 @@
                     attachedDeposit: nearApi.utils.format.parseNearAmount(cantidad)
                 });
                 console.log('Resultado de la llamada al contrato:', result);
-                document.getElementById('status').textContent = 'Pago realizado con éxito. ID de la transacción: ' + result.transaction_outcome.id;
+                // document.getElementById('status').textContent = 'Pago realizado con éxito. ID de la transacción: ' + result.transaction_outcome.id;
             } catch (error) {
                 console.error('Error al realizar el pago:', error);
-                document.getElementById('status').textContent = 'Error al realizar el pago: ' + error.message;
+                // document.getElementById('status').textContent = 'Error al realizar el pago: ' + error.message;
             }
         }
 
         async function getPayments(wallet) {
-            const { network } = config;
+            const {
+                network
+            } = config;
             const provider = new nearApi.providers.JsonRpcProvider('https://rpc.testnet.near.org');
 
             try {
@@ -144,17 +185,27 @@
                     request_type: 'call_function',
                     account_id: 'paymentchicha.testnet',
                     method_name: 'get_payments',
-                    args_base64: Buffer.from(JSON.stringify({ from_index: 0, limit: 10 })).toString('base64'),
+                    args_base64: Buffer.from(JSON.stringify({
+                        from_index: 0,
+                        limit: 10000
+                    })).toString('base64'),
                     finality: 'optimistic',
                 });
-
-                const payments = JSON.parse(Buffer.from(result.result).toString());
+                var payments;
+                try {
+                    payments = JSON.parse(Buffer.from(result.result).toString());
+                    localStorage.setItem('paymentsList', payments);
+                } catch {
+                    payment = localStorage.getItem('paymentsList');
+                }
 
                 // Formatear los datos
                 const formattedPayments = payments.map(payment => {
-                    const date = new Date(Number(payment.timestamp) / 1e6); // Convertir timestamp a milisegundos
+                    const date = new Date(Number(payment.timestamp) /
+                    1e6); // Convertir timestamp a milisegundos
                     const formattedDate = date.toLocaleString(); // Formatear la fecha
-                    const formattedAmount = nearApi.utils.format.formatNearAmount(payment.amount); // Formatear el amount
+                    const formattedAmount = nearApi.utils.format.formatNearAmount(payment
+                    .amount); // Formatear el amount
                     return {
                         ...payment,
                         timestamp: formattedDate,
@@ -162,15 +213,19 @@
                     };
                 });
 
+                const nearPriceMXN = await getNearMXN();
+
                 // Crear la tabla HTML
-                let tableHtml = '<table class="table table-striped">';
-                tableHtml += '<thead><tr><th>Realizó pago</th><th>Recibió pago</th><th>Cantidad(N)</th><th>Fecha</th><th>Tarea</th></tr></thead>';
+                let tableHtml = '<table class="table table-bordered table-hover bg-white">';
+                tableHtml +=
+                    '<thead><tr><th>Realizó pago</th><th>Recibió pago</th><th>Cantidad(N)</th><th>Valor(MXN)</th><th>Fecha</th><th>Tarea</th></tr></thead>';
                 tableHtml += '<tbody>';
                 formattedPayments.forEach(payment => {
                     tableHtml += `<tr>
                         <td>${payment.sender}</td>
                         <td>${payment.recipient}</td>
                         <td>${payment.amount}</td>
+                        <td>$${(parseFloat(payment.amount) * nearPriceMXN).toFixed(2)}</td>
                         <td>${payment.timestamp}</td>
                         <td>${payment.mensaje}</td>
                     </tr>`;
@@ -180,7 +235,8 @@
                 document.getElementById('payments').innerHTML = tableHtml;
             } catch (error) {
                 console.error('Error al obtener los pagos del contrato:', error);
-                document.getElementById('payments').textContent = 'Error al obtener los pagos del contrato: ' + error.message;
+                document.getElementById('payments').textContent = 'Error al obtener los pagos del contrato: ' + error
+                    .message;
             }
         }
 
@@ -191,17 +247,13 @@
 
             const loginButton = document.getElementById('login-button');
             const logoutButton = document.getElementById('logout-button');
-            const status = document.getElementById('status');
+            const cargando = document.getElementById('cargando');
 
+            cargando.style.display = 'block';
             if (wallet.isSignedIn()) {
-                loginButton.style.display = 'none';
-                for (var i = 0; i < sesion.length; i++) {
-                    sesion[i].style.display = 'block';
-                }
 
-                for (var i = 0; i < sinsesion.length; i++) {
-                    sinsesion[i].style.display = 'none';
-                }
+
+                loginButton.style.display = 'none';
 
                 logoutButton.style.display = 'block';
                 const account = wallet.account();
@@ -209,7 +261,26 @@
                 const availableBalance = nearApi.utils.format.formatNearAmount(balance.available);
 
                 document.getElementById('cuenta').textContent = `Wallet: ${wallet.getAccountId()}`;
-                document.getElementById('balance').textContent = `Disponible: ${availableBalance}`;
+                document.getElementById('balance').textContent = `Disponible: ${parseFloat(availableBalance).toFixed(5)} NEAR`;
+                const nearPriceMXN = await getNearMXN();
+                document.getElementById('balanceMXN').textContent =
+                    `Valor: $${(parseFloat(availableBalance) * nearPriceMXN).toFixed(2)} MXN`;
+                    document.getElementById('valorMXNNEar').textContent =
+                    `1 NEAR : $${nearPriceMXN.toFixed(2)} MXN`;
+                    cargando.style.display = 'none';
+
+                setTimeout(() => {
+
+                    for (var i = 0; i < sinsesion.length; i++) {
+                        sinsesion[i].style.display = 'none';
+                    }
+                    for (var i = 0; i < sesion.length; i++) {
+                        sesion[i].style.display = 'block';
+                    }
+
+
+                }, 500);
+
 
                 // // Enviar información de la billetera al backend
                 // fetch('/auth/save-wallet', {
@@ -221,6 +292,8 @@
                 //     body: JSON.stringify({ accountId: wallet.getAccountId() })
                 // });
             } else {
+                cargando.style.display = 'none';
+
                 for (var i = 0; i < sesion.length; i++) {
                     sesion[i].style.display = 'none';
                 }
@@ -231,7 +304,6 @@
 
                 loginButton.style.display = 'block';
                 logoutButton.style.display = 'none';
-                status.textContent = 'No has iniciado sesión';
             }
         }
 
@@ -262,7 +334,7 @@
             };
 
             // document.getElementById('get-payments-button').onclick = async () => {
-                await getPayments(wallet);
+            await getPayments(wallet);
             // };
 
             updateUI(wallet);
