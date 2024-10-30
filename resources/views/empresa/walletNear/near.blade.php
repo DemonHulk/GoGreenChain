@@ -50,11 +50,11 @@
             </div>
         </div>
     </div>
-    <button id="send-near-button">Enviar NEAR</button>
+    {{-- <button id="send-near-button">Enviar NEAR</button> --}}
     {{-- <button id="get-payments-button">Obtener Pagos</button> --}}
 
-    <div class="container sesion">
-        <h2>Tareas Completadas</h2>
+    <div class=" sesion">
+        <h2 class="display-5 font-weight-bold mb-4 sesion">Pagar tareas completadas.</h2>
         <div id="completed-tasks">
             @if ($completedTasks->isEmpty())
                 <p>No hay tareas completadas.</p>
@@ -88,6 +88,7 @@
             @endif
         </div>
     </div>
+    <h2 class="display-5 font-weight-bold mb-4 sesion">Historial de pagos registrados con la Wallet.</h2>
 
     <div id="payments"></div>
 
@@ -364,11 +365,11 @@
                 updateUI(wallet);
             };
 
-            document.getElementById('send-near-button').onclick = async () => {
-                const receiverAccountId = prompt('Ingrese la cuenta del receptor:');
-                const amount = prompt('Ingrese la cantidad de NEAR a enviar:');
-                await sendNear(wallet, receiverAccountId, amount);
-            };
+            // document.getElementById('send-near-button').onclick = async () => {
+            //     const receiverAccountId = prompt('Ingrese la cuenta del receptor:');
+            //     const amount = prompt('Ingrese la cantidad de NEAR a enviar:');
+            //     await sendNear(wallet, receiverAccountId, amount);
+            // };
 
             // Agregar evento onclick a los botones de pagar tarea
             document.addEventListener('click', function(event) {
