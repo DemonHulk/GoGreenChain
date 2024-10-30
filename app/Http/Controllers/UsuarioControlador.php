@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class UsuarioControlador extends Controller
@@ -35,26 +36,113 @@ class UsuarioControlador extends Controller
     }
     
     
-    public function ver_tareas_usuario()
+    public function ver_tareas_usuario(Request $request)
     {
         // Obtener el usuario autenticado
-    $user = Auth::user();
-
-    // Retornar una vista con los datos del usuario
-
-    return view('usuario.perfil.ver_tareas', compact('user'));
-    }
-
-    public function mis_tareas_usuario()
-    {
-        // Obtener el usuario autenticado
-    $user = Auth::user();
-
-    // Retornar una vista con los datos del usuario 
-
-    return view('usuario.perfil.mis_tareas', compact('user'));
-    }
+        $user = Auth::user();
+    
+        // Separar la ubicación del usuario en latitud y longitud si está disponible
+        if ($user->location) {
+            [$userLat, $userLng] = explode(',', $user->location);
+        } else {
+            // Si no hay ubicación en el perfil del usuario, retorna la vista sin tareas
+            return view('usuario.perfil.ver_tareas', ['user' => $user, 'tasks' => json_encode([])]);
+        }
+    
+        // Obtener la ubicación ingresada y la distancia máxima en kilómetros
+        $userCoordinates = $request->input('location');
+        $maxDistance = $request->input('kilometers') ?: 10;        
         
+        // Inicializar la colección de tareas
+        $tasks = collect();
+        
+        if ($userCoordinates) {
+            [$lat, $lng] = explode(',', $userCoordinates);
+    
+            // Consulta para calcular la distancia con la fórmula Haversine utilizando Eloquent
+            $tasks = Tasks::with('empresa') 
+                ->selectRaw("*, 
+                    (6371 * acos(
+                        cos(radians(?)) * 
+                        cos(radians(CAST(SPLIT_PART(location, ',', 1) AS DOUBLE PRECISION))) * 
+                        cos(radians(CAST(SPLIT_PART(location, ',', 2) AS DOUBLE PRECISION)) - radians(?)) + 
+                        sin(radians(?)) * 
+                        sin(radians(CAST(SPLIT_PART(location, ',', 1) AS DOUBLE PRECISION)))
+                    )) AS distance", [$lat, $lng, $lat])
+                ->where('status', 'pending')
+                ->whereRaw("(6371 * acos(
+                        cos(radians(?)) * 
+                        cos(radians(CAST(SPLIT_PART(location, ',', 1) AS DOUBLE PRECISION))) * 
+                        cos(radians(CAST(SPLIT_PART(location, ',', 2) AS DOUBLE PRECISION)) - radians(?)) + 
+                        sin(radians(?)) * 
+                        sin(radians(CAST(SPLIT_PART(location, ',', 1) AS DOUBLE PRECISION)))
+                    )) <= ?", [$lat, $lng, $lat, $maxDistance])
+                ->orderBy("distance")
+                ->get();
+        }
+    
+        return view('usuario.perfil.ver_tareas', compact('user', 'tasks'));
+    }
+    
+    public function aceptar_tarea_usuario($id)
+    {
+        try {
+            // Obtener el usuario autenticado
+            $user = Auth::user();
+            
+            // Buscar la tarea
+            $tarea = Tasks::findOrFail($id);
+            
+            // Actualizar la tarea
+            $tarea->update([
+                'status' => 'accepted',
+                'id_usuario' => $user->id
+            ]);
+            
+            // Redirigir a la vista de mis tareas del usuario después de aceptar la tarea
+            return redirect()->route('usuario.perfil.mis_tareas')->with('success', 'Tarea aceptada correctamente');
+            
+        } catch (\Exception $e) {
+            return redirect()->route('usuario.perfil.ver_tareas')->with('error', 'Ocurrió un error al aceptar la tarea');
+        }
+    }
+    
+    public function mis_tareas_usuario(Request $request)
+{
+    // Obtener el usuario autenticado
+    $user = Auth::user();
+    
+    // Obtener el filtro seleccionado en la vista
+    $status = $request->input('status');
+    
+    // Iniciar la consulta base
+    $tasksQuery = Tasks::where('id_usuario', $user->id);
+    
+    // Aplicar filtros según el estado seleccionado
+    if ($status) {
+        $tasksQuery->where('status', $status);
+    }
+    
+    // Obtener las tareas
+    $tasks = $tasksQuery->get();
+    
+    // Obtener conteos para cada estado
+    $totalTasks = Tasks::where('id_usuario', $user->id)->count();
+    $pendingTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'pending')->count();
+    $acceptedTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'accepted')->count();
+    $completedTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'completed')->count();
+    
+    return view('usuario.perfil.mis_tareas', compact(
+        'user',
+        'tasks',
+        'totalTasks',
+        'pendingTasksCount',
+        'acceptedTasksCount',
+        'completedTasksCount'
+    ));
+}
+    
+    
     public function mi_historial_usuario()
     {
         // Obtener el usuario autenticado
@@ -107,43 +195,6 @@ class UsuarioControlador extends Controller
             return '0';
         }
     }
-
-    public function prepareTransfer(Request $request)
-{
-    try {
-        $validated = $request->validate([
-            'to_address' => 'required|string',
-            'amount' => 'required|numeric|min:0.000001',
-        ]);
-
-        // Supongamos que tienes una función que verifica el saldo del usuario.
-        $currentBalance = $this->getUserBalance(); // Implementa esta función según tu lógica
-
-        if ($validated['amount'] > $currentBalance) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Saldo insuficiente para realizar la transferencia.'
-            ], 422);
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'data' => [
-                'to_address' => $validated['to_address'],
-                'amount' => $validated['amount']
-            ]
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage()
-        ], 422);
-    }
-}
-
-
-    
-
 
     /**
      * Show the form for creating a new resource.

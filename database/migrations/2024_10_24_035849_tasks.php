@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('reward', 10, 2); // Recompensa en tokens
             $table->string('location'); // Ubicación de la tarea
             $table->enum('task_type', ['Servicio Comunitario', 'Ambiental', 'Educativa', 'Técnica']); // Tipo de tarea
-            $table->enum('status', ['pending', 'completed'])->default('pending'); // Estado de la tarea
+            $table->enum('status', ['pending', 'accepted' ,'completed'])->default('pending'); // Estado de la tarea
             $table->timestamps(); // Timestamps para las fechas de creación y actualización
         });
     }

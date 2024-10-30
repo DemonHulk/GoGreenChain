@@ -90,20 +90,20 @@
                                     <input type="text" class="form-control" name="username_wallet" value="{{ $user->username_wallet }}" required>
                                 </div>
                                 <div class="form-group mb-3">
-                                    <label class="form-label">Dirección</label>
-                                    <input type="text" class="form-control" name="address" value="{{ $user->address }}" required>
+                                    <label class="form-label">Dirección (Favor de obtener los datos por el botón Obtener Ubicación)</label>
+                                    <input readonly type="text" class="form-control" name="address" value="{{ $user->address }}" required>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label class="form-label">Ciudad</label>
-                                    <input type="text" class="form-control" name="city" value="{{ $user->city }}" required>
+                                    <input readonly type="text" class="form-control" name="city" value="{{ $user->city }}" required>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label class="form-label">Estado</label>
-                                    <input type="text" class="form-control" name="state" value="{{ $user->state }}" required>
+                                    <input readonly type="text" class="form-control" name="state" value="{{ $user->state }}" required>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label class="form-label">Código postal</label>
-                                    <input type="text" class="form-control" id="editPostalCode" name="postal_code" value="{{ $user->postal_code }}" required>
+                                    <input readonly type="text" class="form-control" id="editPostalCode" name="postal_code" value="{{ $user->postal_code }}" required>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label class="form-label">Teléfono</label>

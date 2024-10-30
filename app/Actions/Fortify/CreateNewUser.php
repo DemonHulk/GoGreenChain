@@ -20,23 +20,28 @@ class CreateNewUser implements CreatesNewUsers
     public function create(array $input): User
     {
         Validator::make($input, [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:70', 'regex:/^[\p{L}\s]+$/u'], 
             'id_rol' => ['required', 'in:2,3'], 
-            'username' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'username' => ['required', 'string', 'max:70', 'regex:/^[a-zA-Z0-9]+$/'], 
+            'email' => ['required', 'string', 'email', 'max:70', 'unique:users'],
             'password' => $this->passwordRules(),
-            'address' => ['required', 'string', 'max:255'],
-            'city' => ['required', 'string', 'max:255'],
-            'state' => ['required', 'string', 'max:255'],
-            'postal_code' => ['required', 'string', 'regex:/^\d{5}$/'],
+            'address' => ['required', 'string', 'max:150'],
+            'city' => ['required', 'string', 'max:70'],
+            'state' => ['required', 'string', 'max:70'],
+            'postal_code' => ['required', 'string', 'regex:/^\d{5}$/'], 
             'phone' => ['required', 'string', 'regex:/^\d{10}$/'],
-            'username_wallet' => ['nullable', 'string', 'max:255'],
+            'username_wallet' => ['required', 'string', 'max:50'],
             'profile_photo_path' => ['required', 'image', 'max:2048'], 
             'id_wallet' => ['nullable', 'string', 'max:255'],
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
-            'location' => ['required', 'string'], // Validación para la ubicación
+            'location' => ['required', 'string'], 
         ])->validate();
     
+         // Agregar automáticamente ".testnet" si no está incluido en username_wallet
+        if (!empty($input['username_wallet']) && !str_ends_with($input['username_wallet'], '.testnet')) {
+            $input['username_wallet'] .= '.testnet';
+        }
+
         // Procesamos la imagen y obtenemos la ruta
         $profilePhotoPath = null;
         if (request()->hasFile('profile_photo_path')) {

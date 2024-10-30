@@ -66,6 +66,11 @@ Route::prefix('usuario/perfil')->middleware(['auth', 'can:Usuario'])->group(func
     Route::get('/mis_tareas', [UsuarioControlador::class, 'mis_tareas_usuario'])->name('usuario.perfil.mis_tareas');
     Route::get('/mi_historial_tareas', [UsuarioControlador::class, 'mi_historial_usuario'])->name('usuario.perfil.mi_historial_tareas');
 
+    Route::put('/tareas/aceptar/{id}', [UsuarioControlador::class, 'aceptar_tarea_usuario'])->name('tarea.aceptar');
+
+    Route::get('/tareas/{id}', [UsuarioControlador::class, 'getTaskDetails'])->name('tareas.detalle');
+
+
 });
 
 
