@@ -267,6 +267,8 @@
 
         async function getCompletedTasks() {
             try {
+                const nearPriceMXN = await getNearMXN();
+
                 const completedTasks = @json($completedTasks);
 
                 // Crear la tabla HTML
@@ -279,7 +281,7 @@
                         <td>${task.title}</td>
                         <td>${task.usuario ? task.usuario.name : 'Sin asignar'}</td>
                         <td>${task.usuario ? task.usuario.username_wallet : 'Sin asignar'}</td>
-                        <td>${parseFloat(task.reward).toFixed(2)} NEAR</td>
+                        <td>${parseFloat(task.reward).toFixed(2)} NEAR ($${(parseFloat(parseFloat(task.reward).toFixed(2)) * nearPriceMXN).toFixed(2)} MXN)</td>
                         <td>
                             <button class="btn btn-primary pagar-tarea"
                                     data-username-wallet="${task.usuario.username_wallet}"
