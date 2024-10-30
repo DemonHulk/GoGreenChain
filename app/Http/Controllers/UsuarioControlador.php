@@ -15,7 +15,6 @@ use Illuminate\Validation\ValidationException;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
 class UsuarioControlador extends Controller
 {
    
@@ -108,40 +107,91 @@ class UsuarioControlador extends Controller
     }
     
     public function mis_tareas_usuario(Request $request)
-{
-    // Obtener el usuario autenticado
-    $user = Auth::user();
-    
-    // Obtener el filtro seleccionado en la vista
-    $status = $request->input('status');
-    
-    // Iniciar la consulta base
-    $tasksQuery = Tasks::where('id_usuario', $user->id);
-    
-    // Aplicar filtros según el estado seleccionado
-    if ($status) {
-        $tasksQuery->where('status', $status);
+    {
+        // Obtener el usuario autenticado
+        $user = Auth::user();
+        
+        // Obtener el filtro seleccionado en la vista
+        $status = $request->input('status');
+        
+        // Iniciar la consulta base
+        $tasksQuery = Tasks::where('id_usuario', $user->id);
+        
+        // Aplicar filtros según el estado seleccionado
+        if ($status) {
+            $tasksQuery->where('status', $status);
+        }
+
+        // Ordenar tareas para mostrar primero las 'accepted' y luego las 'completed'
+        $tasks = $tasksQuery->with('empresa')
+            ->select('id', 'title', 'status', 'id_empresa')
+            ->orderByRaw("CASE WHEN status = 'accepted' THEN 1 WHEN status = 'completed' THEN 2 ELSE 3 END") 
+            ->get();
+        
+        // Obtener conteos para cada estado
+        $totalTasks = Tasks::where('id_usuario', $user->id)->count();
+        $acceptedTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'accepted')->count();
+        $completedTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'completed')->count();
+        
+        return view('usuario.perfil.mis_tareas', compact(
+            'user',
+            'tasks',
+            'totalTasks',
+            'acceptedTasksCount',
+            'completedTasksCount'
+        ));
     }
+
+            
+    public function getTaskDetails($id)
+    {
+        $task = Tasks::with('empresa')->find($id); 
+
     
-    // Obtener las tareas
-    $tasks = $tasksQuery->get();
+        if (!$task) {
+            return response()->json(['error' => 'Tarea no encontrada'], 404);
+        }
     
-    // Obtener conteos para cada estado
-    $totalTasks = Tasks::where('id_usuario', $user->id)->count();
-    $pendingTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'pending')->count();
-    $acceptedTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'accepted')->count();
-    $completedTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'completed')->count();
-    
-    return view('usuario.perfil.mis_tareas', compact(
-        'user',
-        'tasks',
-        'totalTasks',
-        'pendingTasksCount',
-        'acceptedTasksCount',
-        'completedTasksCount'
-    ));
-}
-    
+        return response()->json([
+            'title' => $task->title,
+            'description' => $task->description,
+            'start_date' => $task->start_date->format('Y-m-d'), 
+            'end_date' => $task->end_date->format('Y-m-d'),
+            'duration' => $task->duration,
+            'nombre_empresa' => $task->empresa->name, 
+            'price' => $task->price,
+            'location' => $task->location,
+            'reward' => $task->reward,
+            'location_empresa' => $task->empresa->location, 
+        ]);
+    }
+
+    public function completar_tarea(Request $request, $id)
+    {
+        try {
+            
+            // Obtener la tarea
+            $task = Tasks::findOrFail($id);
+            
+            
+            // Actualizar el estado de la tarea
+            $task->status = 'completed';
+            $task->save();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Tarea completada con éxito',
+                'task' => $task
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al completar la tarea: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
     
     public function mi_historial_usuario()
     {
@@ -152,13 +202,6 @@ class UsuarioControlador extends Controller
 
     return view('usuario.perfil.mi_historial_tareas', compact('user'));
     }
-
-
-
-
-
-
-
     
 
     public function getNearBalance($walletUsername)

@@ -259,7 +259,7 @@
                         </a>
                     `);
 
-                    $('#clientName').text(task.id_empresa); // Ajustar según el nombre del cliente
+                    $('#clientName').text(task.id_empresa); 
                     $('#taskRequirements').html('<li>' + task.task_type + '</li>'); // Ajustar según los requisitos
 
                     // Mostrar el modal

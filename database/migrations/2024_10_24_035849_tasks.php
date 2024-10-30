@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('location'); // Ubicación de la tarea
             $table->enum('task_type', ['Servicio Comunitario', 'Ambiental', 'Educativa', 'Técnica']); // Tipo de tarea
             $table->enum('status', ['pending', 'accepted' ,'completed'])->default('pending'); // Estado de la tarea
+            $table->boolean('pagado')->default(false); // Indica si la tarea ha sido pagada
             $table->timestamps(); // Timestamps para las fechas de creación y actualización
         });
     }

@@ -68,8 +68,9 @@ Route::prefix('usuario/perfil')->middleware(['auth', 'can:Usuario'])->group(func
 
     Route::put('/tareas/aceptar/{id}', [UsuarioControlador::class, 'aceptar_tarea_usuario'])->name('tarea.aceptar');
 
-    Route::get('/tareas/{id}', [UsuarioControlador::class, 'getTaskDetails'])->name('tareas.detalle');
-
+    Route::get('/tareas/detalle/{id}', [UsuarioControlador::class, 'getTaskDetails'])->name('tareas.detalle');
+    Route::put('tareas/completar_tarea/{id}', [UsuarioControlador::class, 'completar_tarea'])
+        ->name('tarea.completar_tarea');
 
 });
 
