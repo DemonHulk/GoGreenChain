@@ -21,11 +21,9 @@
                 <h2 class="display-4 font-weight-bold mb-4 sinsesion"> INICIA SESIÓN </h2>
                 <h2 class="display-4 font-weight-bold mb-4 " id="cargando"> CARGANDO WALLET... </h2>
                 <h2 class="display-4 font-weight-bold mb-4 sesion"> <span id="cuenta"></span> </h2>
-                <h2 class="display-4 font-weight-bold mb-4 sesion"> <span id="balance"></span>  </h2>
-                <h2 class="display-4 font-weight-bold mb-4 sesion"> <span id="balanceMXN"></span>  </h2>
-                <h3 class="display-6 font-weight-bold mb-4 sesion"> <span id="valorMXNNEar"></span>  </h3>
-
-
+                <h2 class="display-4 font-weight-bold mb-4 sesion"> <span id="balance"></span> </h2>
+                <h2 class="display-4 font-weight-bold mb-4 sesion"> <span id="balanceMXN"></span> </h2>
+                <h3 class="display-6 font-weight-bold mb-4 sesion"> <span id="valorMXNNEar"></span> </h3>
 
                 <p class="text-muted sesion">
                     Balance disponible
@@ -54,37 +52,44 @@
     </div>
     <button id="send-near-button">Enviar NEAR</button>
     {{-- <button id="get-payments-button">Obtener Pagos</button> --}}
-    <button id="send-payment-button">Enviar Pago</button>
-    <div id="payments"></div>
 
-
-<div class="container">
-    <h2>Tareas Completadas</h2>
-    <div id="completed-tasks">
-        @if($completedTasks->isEmpty())
-            <p>No hay tareas completadas.</p>
-        @else
-            <table class="table table-bordered table-hover bg-white">
-                <thead>
-                    <tr>
-                        <th>Título</th>
-                        <th>Usuario</th>
-                        <th>Recompensa</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($completedTasks as $task)
-                    <tr>
-                        <td>{{ $task->title }}</td>
-                        <td>{{ $task->usuario->name }}</td>
-                        <td>${{ number_format($task->reward, 2) }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
+    <div class="container sesion">
+        <h2>Tareas Completadas</h2>
+        <div id="completed-tasks">
+            @if ($completedTasks->isEmpty())
+                <p>No hay tareas completadas.</p>
+            @else
+                <table class="table table-bordered table-hover bg-white">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Usuario</th>
+                            <th>Recompensa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($completedTasks as $task)
+                            <tr>
+                                <td>{{ $task->title }}</td>
+                                <td>{{ $task->usuario->name }}</td>
+                                <td>{{ number_format($task->reward, 2) }}N</td>
+                                <td>
+                                    <button class="btn btn-primary pagar-tarea"
+                                            data-username-wallet="{{ $task->usuario->username_wallet }}"
+                                            data-title="{{ $task->title }}"
+                                            data-reward="{{ number_format($task->reward, 2) }}">
+                                        Pagar
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </div>
     </div>
-</div>
+
+    <div id="payments"></div>
 
     <script>
         async function getNearMXN() {
@@ -94,7 +99,7 @@
             }
             try {
                 const response = await fetch(
-                'https://api.coingecko.com/api/v3/simple/price?ids=near&vs_currencies=mxn');
+                    'https://api.coingecko.com/api/v3/simple/price?ids=near&vs_currencies=mxn');
                 const data = await response.json();
                 localStorage.setItem('nearmxn', data.near.mxn);
                 for (var i = 0; i < sesion.length; i++) {
@@ -108,6 +113,7 @@
                 return localStorage.getItem('nearmxn');
             }
         }
+
         const config = {
             networkId: 'testnet',
             keyStore: new nearApi.keyStores.BrowserLocalStorageKeyStore(),
@@ -148,7 +154,6 @@
                 const result = await account.sendMoney(receiverAccountId, nearApi.utils.format.parseNearAmount(amount));
                 console.log('Resultado de la transacción:', result);
 
-
                 // Enviar detalles de la transacción al backend
                 const response = await fetch('/log-transaction', {
                     method: 'POST',
@@ -171,12 +176,8 @@
             }
         }
 
-        async function sendPayment(wallet) {
+        async function sendPayment(wallet, cuenta, tarea, cantidad) {
             const account = wallet.account();
-            const cuenta = prompt('A quien enviar:');
-            const tarea = prompt('Porque:');
-            const cantidad = prompt('cuanto:');
-
             const balance = await account.getAccountBalance();
             const availableBalance = nearApi.utils.format.formatNearAmount(balance.available);
 
@@ -205,9 +206,6 @@
         }
 
         async function getPayments(wallet) {
-            const {
-                network
-            } = config;
             const provider = new nearApi.providers.JsonRpcProvider('https://rpc.testnet.near.org');
 
             try {
@@ -224,18 +222,16 @@
                 var payments;
                 try {
                     payments = JSON.parse(Buffer.from(result.result).toString());
-                    localStorage.setItem('paymentsList', payments);
+                    localStorage.setItem('paymentsList', JSON.stringify(payments));
                 } catch {
-                    payment = localStorage.getItem('paymentsList');
+                    payments = JSON.parse(localStorage.getItem('paymentsList'));
                 }
 
                 // Formatear los datos
                 const formattedPayments = payments.map(payment => {
-                    const date = new Date(Number(payment.timestamp) /
-                    1e6); // Convertir timestamp a milisegundos
+                    const date = new Date(Number(payment.timestamp) / 1e6); // Convertir timestamp a milisegundos
                     const formattedDate = date.toLocaleString(); // Formatear la fecha
-                    const formattedAmount = nearApi.utils.format.formatNearAmount(payment
-                    .amount); // Formatear el amount
+                    const formattedAmount = nearApi.utils.format.formatNearAmount(payment.amount); // Formatear el amount
                     return {
                         ...payment,
                         timestamp: formattedDate,
@@ -247,8 +243,7 @@
 
                 // Crear la tabla HTML
                 let tableHtml = '<table class="table table-bordered table-hover bg-white">';
-                tableHtml +=
-                    '<thead><tr><th>Realizó pago</th><th>Recibió pago</th><th>Cantidad(N)</th><th>Valor(MXN)</th><th>Fecha</th><th>Tarea</th></tr></thead>';
+                tableHtml += '<thead><tr><th>Realizó pago</th><th>Recibió pago</th><th>Cantidad(N)</th><th>Valor(MXN)</th><th>Fecha</th><th>Tarea</th></tr></thead>';
                 tableHtml += '<tbody>';
                 formattedPayments.forEach(payment => {
                     tableHtml += `<tr>
@@ -265,45 +260,51 @@
                 document.getElementById('payments').innerHTML = tableHtml;
             } catch (error) {
                 console.error('Error al obtener los pagos del contrato:', error);
-                document.getElementById('payments').textContent = 'Error al obtener los pagos del contrato: ' + error
-                    .message;
+                document.getElementById('payments').textContent = 'Error al obtener los pagos del contrato: ' + error.message;
             }
         }
 
         async function getCompletedTasks() {
-    try {
-        const completedTasks = @json($completedTasks); 
+            try {
+                const completedTasks = @json($completedTasks);
 
-        // Crear la tabla HTML
-        let tableHtml = '<table class="table table-bordered table-hover bg-white">';
-        tableHtml += '<thead><tr><th>Título</th><th>Usuario</th><th>wallet</th><th>Recompensa</th></tr></thead>';
-        tableHtml += '<tbody>';
+                // Crear la tabla HTML
+                let tableHtml = '<table class="table table-bordered table-hover bg-white">';
+                tableHtml += '<thead><tr><th>Título</th><th>Usuario</th><th>wallet</th><th>Recompensa</th><th>Pagar</th></tr></thead>';
+                tableHtml += '<tbody>';
 
-        completedTasks.forEach(task => {
-            tableHtml += `<tr>
-                <td>${task.title}</td>
-                <td>${task.usuario ? task.usuario.name : 'Sin asignar'}</td>
-                <td>${task.usuario ? task.usuario.username_wallet : 'Sin asignar'}</td>
-                <td>$${parseFloat(task.reward).toFixed(2)}</td>
-            </tr>`;
-        });
+                completedTasks.forEach(task => {
+                    tableHtml += `<tr>
+                        <td>${task.title}</td>
+                        <td>${task.usuario ? task.usuario.name : 'Sin asignar'}</td>
+                        <td>${task.usuario ? task.usuario.username_wallet : 'Sin asignar'}</td>
+                        <td>${parseFloat(task.reward).toFixed(2)} NEAR</td>
+                        <td>
+                            <button class="btn btn-primary pagar-tarea"
+                                    data-username-wallet="${task.usuario.username_wallet}"
+                                    data-title="${task.title}"
+                                    data-reward="${parseFloat(task.reward).toFixed(2)}">
+                                Pagar
+                            </button>
+                        </td>
+                    </tr>`;
+                });
 
-        tableHtml += '</tbody></table>';
+                tableHtml += '</tbody></table>';
 
-        document.getElementById('completed-tasks').innerHTML = tableHtml;
+                document.getElementById('completed-tasks').innerHTML = tableHtml;
 
-    } catch (error) {
-        console.error('Error al obtener las tareas completadas:', error);
-        document.getElementById('completed-tasks').textContent = 'Error al obtener las tareas completadas: ' + error.message;
-    }
-}
+            } catch (error) {
+                console.error('Error al obtener las tareas completadas:', error);
+                document.getElementById('completed-tasks').textContent = 'Error al obtener las tareas completadas: ' + error.message;
+            }
+        }
 
-// Llamar a la función cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', getCompletedTasks);
 
+        // Llamar a la función cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', getCompletedTasks);
 
         async function updateUI(wallet) {
-            // Obtén todos los elementos con la clase 'mi-clase'
             var sesion = document.getElementsByClassName('sesion');
             var sinsesion = document.getElementsByClassName('sinsesion');
 
@@ -313,10 +314,7 @@ document.addEventListener('DOMContentLoaded', getCompletedTasks);
 
             cargando.style.display = 'block';
             if (wallet.isSignedIn()) {
-
-
                 loginButton.style.display = 'none';
-
                 logoutButton.style.display = 'block';
                 const account = wallet.account();
                 const balance = await account.getAccountBalance();
@@ -325,45 +323,26 @@ document.addEventListener('DOMContentLoaded', getCompletedTasks);
                 document.getElementById('cuenta').textContent = `Wallet: ${wallet.getAccountId()}`;
                 document.getElementById('balance').textContent = `Disponible: ${parseFloat(availableBalance).toFixed(5)} NEAR`;
                 const nearPriceMXN = await getNearMXN();
-                document.getElementById('balanceMXN').textContent =
-                    `Valor: $${(parseFloat(availableBalance) * nearPriceMXN).toFixed(2)} MXN`;
-                    document.getElementById('valorMXNNEar').textContent =
-                    `1 NEAR : $${nearPriceMXN.toFixed(2)} MXN`;
-                    cargando.style.display = 'none';
+                document.getElementById('balanceMXN').textContent = `Valor: $${(parseFloat(availableBalance) * nearPriceMXN).toFixed(2)} MXN`;
+                document.getElementById('valorMXNNEar').textContent = `1 NEAR : $${nearPriceMXN.toFixed(2)} MXN`;
+                cargando.style.display = 'none';
 
                 setTimeout(() => {
-
                     for (var i = 0; i < sinsesion.length; i++) {
                         sinsesion[i].style.display = 'none';
                     }
                     for (var i = 0; i < sesion.length; i++) {
                         sesion[i].style.display = 'block';
                     }
-
-
                 }, 500);
-
-
-                // // Enviar información de la billetera al backend
-                // fetch('/auth/save-wallet', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //         'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                //     },
-                //     body: JSON.stringify({ accountId: wallet.getAccountId() })
-                // });
             } else {
                 cargando.style.display = 'none';
-
                 for (var i = 0; i < sesion.length; i++) {
                     sesion[i].style.display = 'none';
                 }
-
                 for (var i = 0; i < sinsesion.length; i++) {
                     sinsesion[i].style.display = 'block';
                 }
-
                 loginButton.style.display = 'block';
                 logoutButton.style.display = 'none';
             }
@@ -391,14 +370,19 @@ document.addEventListener('DOMContentLoaded', getCompletedTasks);
                 await sendNear(wallet, receiverAccountId, amount);
             };
 
-            document.getElementById('send-payment-button').onclick = async () => {
-                await sendPayment(wallet);
-            };
+            // Agregar evento onclick a los botones de pagar tarea
+            document.addEventListener('click', function(event) {
+                if (event.target.classList.contains('pagar-tarea')) {
+                    const button = event.target;
+                    const cuenta = button.getAttribute('data-username-wallet');
+                    const tarea = button.getAttribute('data-title');
+                    const cantidad = button.getAttribute('data-reward');
+                    sendPayment(wallet, cuenta, tarea, cantidad);
 
-            // document.getElementById('get-payments-button').onclick = async () => {
+                }
+            });
+
             await getPayments(wallet);
-            // };
-
             updateUI(wallet);
         }
 
