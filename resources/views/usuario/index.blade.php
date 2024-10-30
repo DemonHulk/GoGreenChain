@@ -31,7 +31,7 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="text-center mb-3">
-                    <a href="{{ route('usuario.perfil.ver_tareas') }}" class="btn btn-success btn-lg btn-block">
+                    <a href="{{ route('usuario.perfil.ver_tareas') }}" class="btn btn-primary btn-lg btn-block">
                         <i class="fas fa-list-ul mr-2"></i>
                         Ver Tareas
                     </a>
@@ -39,9 +39,9 @@
             </div>
             <div class="col-md-6">
                 <div class="text-center mb-3">
-                    <a href="{{ route('usuario.perfil.mi_historial_tareas') }}" class="btn btn-info btn-lg btn-block">
+                    <a href="{{ route('usuario.perfil.mis_tareas') }}" class="btn btn-success btn-lg btn-block">
                         <i class="fas fa-history mr-2"></i>
-                        Ver Historial
+                        Ver Mis Tareas
                     </a>
                 </div>
             </div>

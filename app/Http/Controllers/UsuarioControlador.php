@@ -517,5 +517,19 @@ class UsuarioControlador extends Controller
     {
        
     }
+
+    public function near_vista()
+    {
+        $user = Auth::user();
+        
+        // Obtenemos las tareas con sus usuarios relacionados
+        $completedTasks = Tasks::where('id_empresa', $user->id)
+            ->where('status', 'completed')
+            ->join('users', 'tasks.id_usuario', '=', 'users.id')  // Unimos con la tabla users
+            ->select('tasks.*', 'users.name as usuario_nombre')  // Seleccionamos los campos que necesitamos
+            ->get();
+        
+        return view('empresa.walletNear.near', compact('user', 'completedTasks'));
+    }
     
 }
