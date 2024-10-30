@@ -79,6 +79,12 @@ public function tasks_as_empresa(): HasMany
     return $this->hasMany(Tasks::class, 'id_empresa');
 }
 
+
+public function tareas()
+{
+    return $this->hasMany(Tasks::class, 'id_usuario');
+}
+
 /**
  * Relación: usuario como el que acepta las tareas.
  */

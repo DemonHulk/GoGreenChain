@@ -319,6 +319,12 @@ return [
         'can' => 'Usuario',
         ],
         [
+            'text' => 'Mi Wallet Usuario',
+            'icon'    => 'fas fa-fw fa-wallet',
+            'url'  => 'admin',
+            'can' => 'Usuario',
+        ],
+        [
             'text' => 'Mi perfil',
             'icon'    => 'fas fa-fw fa-user',
             'url'  => 'usuario/perfil/mi_perfil',
@@ -347,6 +353,12 @@ return [
         ['header' => 'Opciones de Empresa',
         'icon'    => 'fas fa-fw fa-share',
         'can' => 'Empresa',
+        ],
+        [
+            'text' => 'Mi Wallet Empresa',
+            'icon'    => 'fas fa-fw fa-wallet',
+            'url'  => 'empresa/walletNear/near',
+            'can' => 'Empresa',
         ],
         [
             'text' => 'Mi Empresa',

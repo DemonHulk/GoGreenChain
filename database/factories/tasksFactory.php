@@ -37,7 +37,7 @@ class tasksFactory extends Factory
             'description' => $this->faker->paragraph(), // Descripción aleatoria
             'start_date' => $this->faker->date(), // Fecha de inicio aleatoria
             'end_date' => $this->faker->date(), // Fecha de fin aleatoria
-            'reward' => $this->faker->randomFloat(2, 10, 100), // Recompensa aleatoria entre 10 y 100
+            'reward' => $this->faker->randomFloat(2, 0.1, 15), // Recompensa aleatoria entre 0.1 a 15
             'location' => $this->faker->randomElement($locations), // Ubicación aleatoria cercana
             'task_type' => $this->faker->randomElement(['Servicio Comunitario', 'Ambiental', 'Educativa', 'Técnica']), // Tipo de tarea aleatorio
             'status' => $this->faker->randomElement(['pending']), // Estado aleatorio

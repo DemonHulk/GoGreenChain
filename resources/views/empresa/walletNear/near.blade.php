@@ -56,6 +56,36 @@
     {{-- <button id="get-payments-button">Obtener Pagos</button> --}}
     <button id="send-payment-button">Enviar Pago</button>
     <div id="payments"></div>
+
+
+<div class="container">
+    <h2>Tareas Completadas</h2>
+    <div id="completed-tasks">
+        @if($completedTasks->isEmpty())
+            <p>No hay tareas completadas.</p>
+        @else
+            <table class="table table-bordered table-hover bg-white">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Usuario</th>
+                        <th>Recompensa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($completedTasks as $task)
+                    <tr>
+                        <td>{{ $task->title }}</td>
+                        <td>{{ $task->usuario->name }}</td>
+                        <td>${{ number_format($task->reward, 2) }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
+</div>
+
     <script>
         async function getNearMXN() {
             var sesion = document.getElementsByClassName('sesion');
@@ -239,6 +269,38 @@
                     .message;
             }
         }
+
+        async function getCompletedTasks() {
+    try {
+        const completedTasks = @json($completedTasks); 
+
+        // Crear la tabla HTML
+        let tableHtml = '<table class="table table-bordered table-hover bg-white">';
+        tableHtml += '<thead><tr><th>Título</th><th>Usuario</th><th>wallet</th><th>Recompensa</th></tr></thead>';
+        tableHtml += '<tbody>';
+
+        completedTasks.forEach(task => {
+            tableHtml += `<tr>
+                <td>${task.title}</td>
+                <td>${task.usuario ? task.usuario.name : 'Sin asignar'}</td>
+                <td>${task.usuario ? task.usuario.username_wallet : 'Sin asignar'}</td>
+                <td>$${parseFloat(task.reward).toFixed(2)}</td>
+            </tr>`;
+        });
+
+        tableHtml += '</tbody></table>';
+
+        document.getElementById('completed-tasks').innerHTML = tableHtml;
+
+    } catch (error) {
+        console.error('Error al obtener las tareas completadas:', error);
+        document.getElementById('completed-tasks').textContent = 'Error al obtener las tareas completadas: ' + error.message;
+    }
+}
+
+// Llamar a la función cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', getCompletedTasks);
+
 
         async function updateUI(wallet) {
             // Obtén todos los elementos con la clase 'mi-clase'
