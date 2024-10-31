@@ -68,11 +68,6 @@
                         <span class="ml-2 text-sm text-gray-600">{{ __('Recordar Usuario') }}</span>
                     </label>
 
-                    @if (Route::has('password.request'))
-                        <a class="text-sm text-green-600 hover:text-green-800" href="{{ route('password.request') }}">
-                            ¿Olvidaste tu contraseña?
-                        </a>
-                    @endif
                 </div>
 
                 <div>

@@ -94,11 +94,11 @@
                                     <div class="input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">
-                                                <i class="fas fa-token"></i>
+                                                <i class="fas fa-dollar-sign"></i>
                                             </span>
                                         </div>
                                         <input type="number" class="form-control" name="reward" 
-                                               placeholder="Cantidad de tokens" min="0" required>
+                                               placeholder="Cantidad" min="0.1" max="25" required>
                                     </div>
                                 </div>
                             </div>

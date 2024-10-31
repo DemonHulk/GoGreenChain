@@ -107,6 +107,11 @@
                           <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
                           <input type="email" name="email" class="form-control" value="{{ $user->email }}" required>
                       </div>
+
+                      <div class="form-group">
+                        <label>Wallet</label>
+                        <input type="text" name="username_wallet" class="form-control" value="{{ $user->username_wallet }}" required>
+                    </div>
               
                       <div class="form-group">
                           <label><i class="fas fa-map-marker-alt"></i> Dirección</label>

@@ -233,48 +233,49 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-        function loadTaskDetails(taskId) {
-            // Realizar una solicitud AJAX para obtener los detalles de la tarea
-            $.ajax({
-                url: "{{ route('empresa.perfil.obtenerTarea', '') }}/" + taskId,
-                method: "GET",
-                success: function(task) {
-                    // Formatear las fechas
-                    const startDate = new Date(task.start_date);
-                    const endDate = new Date(task.end_date);
+    function loadTaskDetails(taskId) {
+        // Realizar una solicitud AJAX para obtener los detalles de la tarea
+        $.ajax({
+            url: "{{ route('empresa.perfil.obtenerTarea', '') }}/" + taskId,
+            method: "GET",
+            success: function(task) {
+                // Extraer latitud y longitud desde el campo 'location'
+                const [latitude, longitude] = task.location.split(',');
 
-                    // Formatear las fechas a formato "dd/mm/yyyy"
-                    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-                    const formattedStartDate = startDate.toLocaleDateString('es-ES', options);
-                    const formattedEndDate = endDate.toLocaleDateString('es-ES', options);
+                // Formatear las fechas
+                const startDate = new Date(task.start_date);
+                const endDate = new Date(task.end_date);
 
-                    // Calcular la duración en días
-                    const durationInDays = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)); // Dif. en ms -> días
+                const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+                const formattedStartDate = startDate.toLocaleDateString('es-ES', options);
+                const formattedEndDate = endDate.toLocaleDateString('es-ES', options);
 
-                    // Actualizar contenido del modal
-                    $('#taskTitle').text(task.title);
-                    $('#taskId').text(task.id);
-                    $('#taskDescription').text(task.description);
-                    $('#taskDate').html(`Desde ${formattedStartDate} <br> hasta ${formattedEndDate}`);
-                    $('#taskDuration').text(`${durationInDays} días`);
-                    $('#taskPrice').text(`Recompensa: ${task.reward} tokens`);
+                const durationInDays = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)); 
 
-                    // Mostrar ubicación con enlace a Google Maps usando coordenadas
-                    $('#taskLocation').html(`
-                        ${task.location} 
-                        <a href="https://www.google.com/maps/search/?api=1&query=${task.latitude},${task.longitude}" target="_blank" class="btn btn-link">
-                            Ver ubicación
-                        </a>
-                    `);
+                // Actualizar contenido del modal
+                $('#taskTitle').text(task.title);
+                $('#taskId').text(task.id);
+                $('#taskDescription').text(task.description);
+                $('#taskDate').html(`Desde ${formattedStartDate} <br> hasta ${formattedEndDate}`);
+                $('#taskDuration').text(`${durationInDays} días`);
+                $('#taskPrice').text(`Recompensa: ${task.reward} tokens`);
 
+                // Crear el enlace de Google Maps
+                $('#taskLocation').html(`
+                    <i class="fas fa-map-marker-alt"></i> 
+                    <span>${task.location}</span>
+                    <a href="https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}" target="_blank" class="btn btn-link">
+                        Ver ubicación
+                    </a>
+                `);
 
-                    // Mostrar el modal
-                    $('#taskDetailModal').modal('show');
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error al obtener los detalles de la tarea:", error);
-                }
-            });
-        }
+                // Mostrar el modal
+                $('#taskDetailModal').modal('show');
+            },
+            error: function(xhr, status, error) {
+                console.error("Error al obtener los detalles de la tarea:", error);
+            }
+        });
+    }
     </script>
 @stop

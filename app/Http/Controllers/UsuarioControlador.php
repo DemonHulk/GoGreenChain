@@ -529,6 +529,7 @@ class UsuarioControlador extends Controller
             'state' => 'required|string',
             'postal_code' => 'required|string',
             'phone' => 'required|string',
+            'username_wallet' => 'required|string',
             'location' => 'required|string', // Validación para la ubicación
         ]);
 
@@ -547,6 +548,7 @@ class UsuarioControlador extends Controller
         $user->postal_code = $request->postal_code;
         $user->phone = $request->phone;
         $user->location = $request->location; 
+        $user->username_wallet = $request->username_wallet; 
         $user->password = Hash::make($request->password);
         $user->save();
 
