@@ -70,7 +70,7 @@ return new class extends Migration
                 'phone' => '1122334455',
                 'postal_code' => '54321',
                 'location' => '21.800174588382458, -105.20558786763493',
-                'username_wallet' => 'test.tesnet'
+                'username_wallet' => 'test.testnet'
             ]);
 
             // Create user with User role

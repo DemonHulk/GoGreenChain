@@ -17,7 +17,7 @@
                 <!-- Call to Action -->
                 <div class="col-md-12 text-center mb-4">
                     <a href="{{ route('login') }}" class="btn btn-lg btn-success">
-                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        <i class="fas fa-sign-in-alt mr-2"></i>Iniciar sesión
                     </a>
                 </div>
               <div class="btn-group">

@@ -31,10 +31,6 @@
                                      alt="User profile picture">
                             </div>
                             <h3 class="profile-username text-center">{{ $empresa->name }}</h3>
-                            <p class="text-muted text-center">
-                                <i class="fas fa-wallet text-info"></i> 
-                                <span class="ml-1">{{ $empresa->username_wallet }}</span>
-                            </p>
                             <ul class="list-group list-group-unbordered mb-3">
                                 <li class="list-group-item">
                                     <b><i class="fas fa-envelope text-info mr-1"></i> Email</b>
@@ -95,19 +91,13 @@
                                                     <td width="200">
                                                         <strong>
                                                             <i class="fas fa-user text-primary mr-1"></i>
-                                                            Nombre Completo
+                                                            Nombre 
                                                         </strong>
                                                     </td>
                                                     <td>{{ $empresa->name }}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td>
-                                                        <strong>
-                                                            <i class="fas fa-wallet text-primary mr-1"></i>
-                                                            Wallet Near
-                                                        </strong>
-                                                    </td>
-                                                    <td>{{ $empresa->username_wallet }}</td>
+                                                    
                                                 </tr>
                                                 <tr>
                                                     <td>
