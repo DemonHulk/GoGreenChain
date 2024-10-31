@@ -22,10 +22,6 @@ return new class extends Migration
         RolModelo::create(['tipo' => 'Empresa']);
         RolModelo::create(['tipo' => 'Usuario']);
     }
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('rol');
