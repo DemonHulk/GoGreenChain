@@ -109,7 +109,7 @@
                                     <label>
                                         <i class="fas fa-tags mr-1"></i>Tipo de Tarea
                                     </label>
-                                    <select class="form-control select2" name="task_type" style="width: 100%;" required>
+                                    <select class="form-control select" name="task_type" style="width: 100%;" required>
                                         <option selected disabled>Selecciona un tipo de tarea</option>
                                         <option value="Servicio Comunitario">
                                             <i class="fas fa-hands-helping"></i> Servicio Comunitario
