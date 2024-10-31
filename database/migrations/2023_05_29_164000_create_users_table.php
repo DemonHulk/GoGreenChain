@@ -70,7 +70,8 @@ return new class extends Migration
                 'phone' => '1122334455',
                 'postal_code' => '54321',
                 'location' => '21.800174588382458, -105.20558786763493',
-                'username_wallet' => 'test.testnet'
+                'username_wallet' => 'test.testnet',
+                'profile_photo_path' => 'empresa/1730327956_gogreenchain.png'
             ]);
 
             // Create user with User role
@@ -86,7 +87,8 @@ return new class extends Migration
                 'phone' => '1122334455', 
                 'postal_code' => '54321',
                 'location' => '21.800174588382458, -105.20558786763493',
-                'username_wallet' => 'test.testnet' 
+                'username_wallet' => 'test.testnet',
+                'profile_photo_path' => 'usuario/1730327956_gogreenchain.png'
             ]);
 
 
