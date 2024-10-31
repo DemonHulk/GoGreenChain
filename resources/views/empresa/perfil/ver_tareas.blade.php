@@ -179,7 +179,7 @@
                                 </div>
                                 <div class="mt-4">
                                     <h5>Ubicación</h5>
-                                    <p><i class="fas fa-map-marker-alt"></i> <span id="taskLocation"></span></p>
+                                    <p> <span id="taskLocation"></span></p>
                                 </div>
                                 
                             </div>
@@ -228,7 +228,6 @@
     <script src="https://kit.fontawesome.com/42813926db.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

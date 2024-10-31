@@ -30,9 +30,8 @@ class CreateNewUser implements CreatesNewUsers
             'state' => ['required', 'string', 'max:70'],
             'postal_code' => ['required', 'string', 'regex:/^\d{5}$/'], 
             'phone' => ['required', 'string', 'regex:/^\d{10}$/'],
-            'username_wallet' => ['required', 'string', 'max:50'],
-            'profile_photo_path' => ['required', 'image', 'max:2048'], 
-            'id_wallet' => ['nullable', 'string', 'max:255'],
+            'username_wallet' => 'required|string|regex:/^[a-zA-Z0-9]+$/',
+            'profile_photo_path' => ['required', 'image', 'max:2048'],
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
             'location' => ['required', 'string'], 
         ])->validate();

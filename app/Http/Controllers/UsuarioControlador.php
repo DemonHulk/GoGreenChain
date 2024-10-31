@@ -421,8 +421,7 @@ class UsuarioControlador extends Controller
                 'state' => 'required|string',
                 'postal_code' => 'required|string|regex:/^\d{5}$/',
                 'phone' => 'required|string|regex:/^\d{10}$/',
-                'username_wallet' => 'nullable|string',
-                'id_wallet' => 'nullable|string',
+                'username_wallet' => 'required|string|regex:/^[a-zA-Z0-9]+$/',
                 'profile_photo_path' => 'required|image|max:1024'
                 ]);
 
@@ -442,10 +441,7 @@ class UsuarioControlador extends Controller
             $usuario->state = $request->input('state');
             $usuario->postal_code = $request->input('postal_code');
             $usuario->phone = $request->input('phone');
-            $usuario->website = $request->input('website');
-            $usuario->rfc = $request->input('rfc');
             $usuario->username_wallet = $request->input('username_wallet');
-            $usuario->id_wallet = $request->input('id_wallet');
             $usuario->profile_photo_path = $profilePhotoPath;
             $usuario->id_rol = $request->input('id_rol');
             $usuario->save();
@@ -486,7 +482,7 @@ class UsuarioControlador extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'username_wallet' => 'required|string',
+            'username_wallet' => 'required|string|regex:/^[a-zA-Z0-9]+$/',
             'address' => 'required|string',
             'city' => 'required|string',
             'state' => 'required|string',
@@ -529,7 +525,7 @@ class UsuarioControlador extends Controller
             'state' => 'required|string',
             'postal_code' => 'required|string',
             'phone' => 'required|string',
-            'username_wallet' => 'required|string',
+            'username_wallet' => 'required|string|regex:/^[a-zA-Z0-9]+$/',
             'location' => 'required|string', // Validación para la ubicación
         ]);
 

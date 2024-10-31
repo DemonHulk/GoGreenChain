@@ -8,12 +8,6 @@
             <div class="col-sm-6">
                 <h1 class="m-0">Registrar Nueva Tarea</h1>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="#">Inicio</a></li>
-                    <li class="breadcrumb-item active">Registrar Tarea</li>
-                </ol>
-            </div>
         </div>
     </div>
 @stop
@@ -89,7 +83,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>
-                                        <i class="fas fa-coins mr-1"></i>Recompensa (en Near)
+                                        <i class="fas fa-coins mr-1"></i> Recompensa (en Near)
                                     </label>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
@@ -98,7 +92,7 @@
                                             </span>
                                         </div>
                                         <input type="number" class="form-control" name="reward" 
-                                               placeholder="Cantidad" min="0.1" max="25" required>
+                                               placeholder="Cantidad" min="0.1" max="25" step="0.1" required>
                                     </div>
                                 </div>
                             </div>
@@ -107,22 +101,14 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>
-                                        <i class="fas fa-tags mr-1"></i>Tipo de Tarea
+                                        <i class="fas fa-tags mr-1"></i> Tipo de Tarea
                                     </label>
-                                    <select class="form-control select" name="task_type" style="width: 100%;" required>
+                                    <select class="form-control" name="task_type" style="width: 100%;" required>
                                         <option selected disabled>Selecciona un tipo de tarea</option>
-                                        <option value="Servicio Comunitario">
-                                            <i class="fas fa-hands-helping"></i> Servicio Comunitario
-                                        </option>
-                                        <option value="Ambiental">
-                                            <i class="fas fa-leaf"></i> Ambiental
-                                        </option>
-                                        <option value="Educativa">
-                                            <i class="fas fa-graduation-cap"></i> Educativa
-                                        </option>
-                                        <option value="Técnica">
-                                            <i class="fas fa-tools"></i> Técnica
-                                        </option>
+                                        <option value="Servicio Comunitario">Servicio Comunitario</option>
+                                        <option value="Ambiental">Ambiental</option>
+                                        <option value="Educativa">Educativa</option>
+                                        <option value="Técnica">Técnica</option>
                                     </select>
                                 </div>
                             </div>
@@ -131,11 +117,14 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label>
-                                        <i class="fas fa-map-marker-alt mr-1"></i>Ubicación de la Tarea
+                                        <i class="fas fa-map-marker-alt mr-1"></i> Ubicación de la Tarea
                                     </label>
                                     <div class="input-group">
                                         <input type="text" class="form-control" name="location" 
-                                               id="location" placeholder="Ingresa la ubicación" required>
+                                               id="location" placeholder="Ingresa la ubicación (latitud, longitud)" 
+                                               required
+                                               pattern="^-?([1-8]?[0-9](\.\d+)?|90(\.0+)?),\s*-?(180(\.0+)?|((1[0-7][0-9])|([1-9]?[0-9]))(\.\d+)?)$"
+                                               title="Ingrese una coordenada válida en el formato: latitud, longitud. Ejemplo: 1.21212, -12.122">
                                         <div class="input-group-append">
                                             <button type="button" class="btn btn-info" id="getCurrentLocation">
                                                 <i class="fas fa-location-arrow"></i> Usar ubicación actual

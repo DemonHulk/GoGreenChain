@@ -71,7 +71,7 @@
                         <h3 class="text-lg font-medium text-gray-700 mb-4">Dirección (Favor de obtener por el botón Obtener Ubicación) </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="md:col-span-2">
-                                <x-label for="address" value="{{ __('Dirección') }}" />
+                                <x-label for="address" value="{{ __('dirección') }}" />
                                 <x-input id="address" class="block mt-1 w-full" type="text" name="address" :value="old('address')" required placeholder="Calle, Número, Colonia" />
                             </div>
                             <div>
@@ -98,11 +98,6 @@
                             <div>
                                 <x-label for="username_wallet" value="{{ __('Usuario de Wallet') }}" />
                                 <x-input id="username_wallet" class="block mt-1 w-full" type="text" name="username_wallet" :value="old('username_wallet')" placeholder="Usuario de wallet" />
-                            </div>
-    
-                            <div>
-                                <x-label for="id_wallet" value="{{ __('ID de Wallet') }}" />
-                                <x-input id="id_wallet" class="block mt-1 w-full" type="text" name="id_wallet" :value="old('id_wallet')" placeholder="ID de wallet" />
                             </div>
                         </div>
                     </div>
