@@ -101,14 +101,12 @@ DB_USERNAME=gogreenchain_user
 DB_PASSWORD=jkjrytuf*53sd
 
 bash
-Copiar código
 php artisan serve
-(Opcional) Ejecuta los assets del frontend:
-
+Ejecuta los assets del frontend:
 bash
-Copiar código
 npm run dev
 Uso
+
 Registro e Inicio de Sesión
 Los usuarios pueden registrarse en la plataforma y, una vez autenticados, se les asignará un rol.
 Los administradores pueden gestionar usuarios y tareas desde el panel de control.
@@ -118,8 +116,14 @@ Los usuarios pueden completar tareas, recibir recompensas, y ver el estado de su
 Near Wallet
 Este proyecto utiliza la integración de Near Wallet para manejar los tokens de recompensa. Asegúrate de tener configurado el NEAR_ACCOUNT_ID y NEAR_NETWORK en el archivo .env.
 
-Contribuciones
-Las contribuciones son bienvenidas. Por favor, sigue los pasos de pull request y abre un issue si encuentras algún error.
+CREDENCIALES
+Usuario:
+Name: Usuario
+Password: Usuario
+
+Empresa:
+Name: Empresa
+Password: Empresa
 
 Licencia
 Este proyecto está bajo la Licencia MIT. Consulta el archivo LICENSE para más detalles.
