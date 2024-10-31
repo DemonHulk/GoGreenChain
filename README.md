@@ -63,6 +63,9 @@ Genera la clave de la aplicación:
 bash
 php artisan key:generate
 
+NOTA:
+Recuerda crear la base de datos llamada: Gogreenchain
+
 --------------------CONFIGURACIONES IMPORTANTES--------------------
 
 Para poder inicializar el proyecto debemos generar unos permisos en postgres
@@ -100,6 +103,13 @@ DB_DATABASE=gogreenchain
 DB_USERNAME=gogreenchain_user
 DB_PASSWORD=jkjrytuf*53sd
 
+PARA LOS REGISTROS:
+Recuerda correr el siguiente comando:
+php artisan migrate
+EN CASO DE HACER CAMBIOS EN LAS MIGRACIONES:
+php artisan migrate:fresh
+
+CORRER LA APLICACIÓN
 bash
 php artisan serve
 Ejecuta los assets del frontend:
