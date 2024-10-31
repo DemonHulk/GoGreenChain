@@ -64,7 +64,7 @@ bash
 php artisan key:generate
 
 NOTA:
-Recuerda crear la base de datos llamada: gogreenchain
+Recuerda crear la base de datos llamada: gogreenchain (postgreSQl)
 
 --------------------CONFIGURACIONES IMPORTANTES--------------------
 
