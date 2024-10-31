@@ -24,6 +24,7 @@ class Tasks extends Model
         'reward', 
         'location', 
         'task_type', 
+        'paid',
         'status'
     ];
 

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\CobrosModelo;
-use App\Models\RolModelo;
 use App\Models\Tasks;
 use App\Models\User;
 use App\Providers\NearService;
@@ -68,7 +67,7 @@ class UsuarioControlador extends Controller
                         sin(radians(?)) * 
                         sin(radians(CAST(SPLIT_PART(location, ',', 1) AS DOUBLE PRECISION)))
                     )) AS distance", [$lat, $lng, $lat])
-                ->where('status', 'pending')
+                ->where('status', 'pendiente')
                 ->whereRaw("(6371 * acos(
                         cos(radians(?)) * 
                         cos(radians(CAST(SPLIT_PART(location, ',', 1) AS DOUBLE PRECISION))) * 
@@ -94,7 +93,7 @@ class UsuarioControlador extends Controller
             
             // Actualizar la tarea
             $tarea->update([
-                'status' => 'accepted',
+                'status' => 'aceptada',
                 'id_usuario' => $user->id
             ]);
             
@@ -106,6 +105,7 @@ class UsuarioControlador extends Controller
         }
     }
     
+
     public function mis_tareas_usuario(Request $request)
     {
         // Obtener el usuario autenticado
@@ -122,36 +122,36 @@ class UsuarioControlador extends Controller
             $tasksQuery->where('status', $status);
         }
 
-        // Ordenar tareas para mostrar primero las 'accepted' y luego las 'completed'
+        // Ordenar tareas para mostrar primero las 'aceptada' y luego las 'completada'
         $tasks = $tasksQuery->with('empresa')
-            ->select('id', 'title', 'status', 'id_empresa')
-            ->orderByRaw("CASE WHEN status = 'accepted' THEN 1 WHEN status = 'completed' THEN 2 ELSE 3 END") 
+            ->select('id', 'title', 'status', 'id_empresa', 'start_date', 'end_date', 'reward', 'location')
+            ->orderByRaw("CASE WHEN status = 'aceptada' THEN 1 WHEN status = 'aceptada' THEN 2 ELSE 3 END") 
             ->get();
         
         // Obtener conteos para cada estado
         $totalTasks = Tasks::where('id_usuario', $user->id)->count();
-        $acceptedTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'accepted')->count();
-        $completedTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'completed')->count();
+        $aceptadaTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'aceptada')->count();
+        $completadaTasksCount = Tasks::where('id_usuario', $user->id)->where('status', 'completada')->count();
         
         return view('usuario.perfil.mis_tareas', compact(
             'user',
             'tasks',
             'totalTasks',
-            'acceptedTasksCount',
-            'completedTasksCount'
+            'aceptadaTasksCount',
+            'completadaTasksCount'
         ));
     }
 
             
     public function getTaskDetails($id)
     {
-        $task = Tasks::with('empresa')->find($id); 
+        // Cargar la tarea con su empresa y usuario
+        $task = Tasks::with(['empresa', 'usuario'])->find($id); 
 
-    
         if (!$task) {
             return response()->json(['error' => 'Tarea no encontrada'], 404);
         }
-    
+
         return response()->json([
             'title' => $task->title,
             'description' => $task->description,
@@ -162,11 +162,13 @@ class UsuarioControlador extends Controller
             'price' => $task->price,
             'location' => $task->location,
             'reward' => $task->reward,
-            'location_empresa' => $task->empresa->location, 
+            'task_type' => $task->task_type,
+            'location_empresa' => $task->empresa->location
         ]);
     }
 
-    public function completar_tarea(Request $request, $id)
+
+    public function completar_tarea($id)
     {
         try {
             
@@ -175,12 +177,12 @@ class UsuarioControlador extends Controller
             
             
             // Actualizar el estado de la tarea
-            $task->status = 'completed';
+            $task->status = 'completada';
             $task->save();
             
             return response()->json([
                 'success' => true,
-                'message' => 'Tarea completada con éxito',
+                'message' => 'Tarea aceptada con éxito',
                 'task' => $task
             ]);
         } catch (\Exception $e) {
@@ -190,17 +192,32 @@ class UsuarioControlador extends Controller
             ], 500);
         }
     }
-
-
     
-    public function mi_historial_usuario()
+    public function mi_historial_usuario(Request $request)
     {
-        // Obtener el usuario autenticado
+    // Obtener el usuario autenticado
     $user = Auth::user();
+        
+    // Iniciar la consulta base
+    $tasksQuery = Tasks::where('id_usuario', $user->id);
 
-    // Retornar una vista con los datos del usuario 
-
-    return view('usuario.perfil.mi_historial_tareas', compact('user'));
+    // Ordenar tareas para mostrar primero las 'aceptada' y luego las 'completada'
+    $tasks = $tasksQuery->with('empresa')
+        ->select('id', 'title', 'status', 'id_empresa', 'paid', 'reward', 'start_date', 'end_date')
+        ->get();
+    
+    // Obtener conteos para cada estado
+    $totalTasks = Tasks::where('id_usuario', $user->id)->count();
+    $completadas_sin_pagar = Tasks::where('id_usuario', $user->id)->where('paid', false)->count();
+    $completadas_pagadas = Tasks::where('id_usuario', $user->id)->where('paid', true)->count();
+    
+    return view('usuario.perfil.mi_historial_tareas', compact(
+        'user',
+        'tasks',
+        'totalTasks',
+        'completadas_sin_pagar',
+        'completadas_pagadas'
+    ));
     }
     
 
@@ -283,53 +300,72 @@ class UsuarioControlador extends Controller
             'reward' => $request->input('reward'),
             'location' => $request->input('location'),
             'task_type' => $request->input('task_type'),
-            'status' => 'pending', // Estado inicial
+            'status' => 'pendiente', // Estado inicial
         ]);
 
         // Redirigir al usuario con un mensaje de éxito
         return redirect()->route('empresa.perfil.ver_tareas')->with('success', 'Tarea publicada correctamente');
     }
+
     public function ver_tareas(Request $request)
     {
-        // Obtener el usuario autenticado
         $user = Auth::user();
-    
-        // Obtener todas las tareas
-        $tasks = Tasks::all();
-    
-        // Contar tareas según el estado
-        $pendingUnassignedCount = $tasks->where('status', 'pending')->whereNull('id_usuario')->count();
-        $pendingAssignedCount = $tasks->where('status', 'pending')->whereNotNull('id_usuario')->count();
-        $completedCount = $tasks->where('status', 'completed')->whereNotNull('id_usuario')->count();
-    
-        // Aplicar filtro según el estado seleccionado
-        $filteredTasks = Tasks::query();
-        if ($request->filled('status')) {
-            switch ($request->status) {
-                case 'pending_unassigned':
-                    $filteredTasks->where('status', 'pending')->whereNull('id_usuario');
-                    break;
-                case 'pending_assigned':
-                    $filteredTasks->where('status', 'pending')->whereNotNull('id_usuario');
-                    break;
-                case 'completed':
-                    $filteredTasks->where('status', 'completed')->whereNotNull('id_usuario');
-                    break;
-            }
+        
+        // Definimos los estados válidos
+        $estadosValidos = ['pendiente', 'aceptada', 'completada'];
+        
+        // Iniciamos la consulta
+        $tasks = Tasks::query();
+        
+        // Validamos que el status sea válido antes de aplicar el filtro
+        if ($request->has('status') && in_array(strtolower($request->status), $estadosValidos)) {
+            $tasks->where('status', strtolower($request->status));
         }
-    
-        // Obtener las tareas filtradas
-        $tasks = $filteredTasks->get();
-    
+        
+        // Contadores de estados usando una sola consulta
+        $contadores = Tasks::selectRaw('status, count(*) as total')
+                           ->whereIn('status', $estadosValidos)
+                           ->groupBy('status')
+                           ->pluck('total', 'status')
+                           ->toArray();
+        
+        // Asignamos los contadores con valor por defecto 0
+        $pendienteCount = $contadores['pendiente'] ?? 0;
+        $aceptadaCount = $contadores['aceptada'] ?? 0;
+        $completadaCount = $contadores['completada'] ?? 0;
+        
+        // Obtenemos las tareas
+        $tasks = $tasks->get();
+        
         return view('empresa.perfil.ver_tareas', compact(
-            'user',
             'tasks',
-            'pendingUnassignedCount',
-            'pendingAssignedCount',
-            'completedCount'
+            'pendienteCount',
+            'aceptadaCount',
+            'completadaCount',
+            'user'
         ));
     }
-    
+
+    public function ver_perfil_usuario($id)
+    {
+        // Buscar el usuario por su ID
+        $usuario = User::findOrFail($id);
+
+        // Retornar la vista del perfil, pasando los datos del usuario
+        return view('empresa.perfil.ver_perfil_usuario', compact('usuario'));
+    }
+
+
+    public function ver_perfil_empresa($id)
+    {
+        // Buscar empresa por su ID
+        $empresa = User::findOrFail($id);
+
+        // Retornar la vista del perfil, pasando los datos del usuario
+        return view('usuario.perfil.ver_perfil_empresa', compact('empresa'));
+    }
+
+
     public function mi_empresa(Request $request)
     {
         // Obtener el usuario autenticado
@@ -346,12 +382,12 @@ class UsuarioControlador extends Controller
         // Obtener todas las tareas
         $allTasks = $tasks->get();
         
-        // Separar las tareas en activas y completadas
-        $activeTasks = $allTasks->where('status', 'pending');
-        $completedTasks = $allTasks->where('status', 'completed');
+        // Separar las tareas en activas y aceptadas
+        $activeTasks = $allTasks->where('status', 'pendiente');
+        $completadaTasks = $allTasks->where('status', 'completada');
         
         // Retornar una vista con los datos del usuario y las tareas
-        return view('empresa.perfil.mi_empresa', compact('user', 'activeTasks', 'completedTasks'));
+        return view('empresa.perfil.mi_empresa', compact('user', 'activeTasks', 'completadaTasks'));
     }
     
         
@@ -368,13 +404,6 @@ class UsuarioControlador extends Controller
     }
 
     
-    
-    public function create()
-    {
-        $roles = RolModelo::all();
-        return view('admin.usuarios.registrar_usuario', ['roles' => $roles]);
-    }
-
     /**
      * Store a newly created resource in storage.
      */
@@ -421,6 +450,11 @@ class UsuarioControlador extends Controller
             $usuario->id_rol = $request->input('id_rol');
             $usuario->save();
     
+              // Agregar automáticamente ".testnet" si no está incluido en username_wallet
+            if (!empty($input['username_wallet']) && !str_ends_with($request['username_wallet'], '.testnet')) {
+                $request['username_wallet'] .= '.testnet';
+            }
+        
             // Enviar mensaje de guardado exitoso
             $mensaje = [
                 'success' => true,
@@ -444,11 +478,6 @@ class UsuarioControlador extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
-    {
-        $usuario = User::find($id);
-        return view('admin.usuarios.editar_usuario',['usuario' => $usuario, 'roles' => RolModelo::all()]);
-    }
 
     /**
      * Update the specified resource in storage.
@@ -463,9 +492,17 @@ class UsuarioControlador extends Controller
             'state' => 'required|string',
             'postal_code' => 'required|string',
             'phone' => 'required|string',
-            'location' => 'required|string', // Validación para la ubicación
+            'location' => 'required|string',
+            'password' => 'required|string'
         ]);
-    
+
+        $usernameWallet = $request->input('username_wallet');
+
+        if (!empty($usernameWallet) && !str_ends_with($usernameWallet, '.testnet')) {
+            $usernameWallet .= '.testnet';
+        }
+        $request->merge(['username_wallet' => $usernameWallet]);
+
         $user = User::find($id);
         $user->name = $request->name;
         $user->username_wallet = $request->username_wallet;
@@ -474,7 +511,8 @@ class UsuarioControlador extends Controller
         $user->state = $request->state;
         $user->postal_code = $request->postal_code;
         $user->phone = $request->phone;
-        $user->location = $request->location; // Guardar ubicación
+        $user->location = $request->location; 
+        $user->password = Hash::make($request->password);
         $user->save();
     
         return redirect()->back()->with('success', 'Datos actualizados con éxito');
@@ -494,6 +532,13 @@ class UsuarioControlador extends Controller
             'location' => 'required|string', // Validación para la ubicación
         ]);
 
+        $usernameWallet = $request->input('username_wallet');
+
+        if (!empty($usernameWallet) && !str_ends_with($usernameWallet, '.testnet')) {
+            $usernameWallet .= '.testnet';
+        }
+        $request->merge(['username_wallet' => $usernameWallet]);
+
         $user = User::find($id);
         $user->email = $request->email;
         $user->address = $request->address;
@@ -501,7 +546,8 @@ class UsuarioControlador extends Controller
         $user->state = $request->state;
         $user->postal_code = $request->postal_code;
         $user->phone = $request->phone;
-        $user->location = $request->location; // Guardar ubicación
+        $user->location = $request->location; 
+        $user->password = Hash::make($request->password);
         $user->save();
 
         return redirect()->back()->with('success', 'Datos actualizados con éxito');
@@ -523,13 +569,37 @@ class UsuarioControlador extends Controller
         $user = Auth::user();
         
         // Obtenemos las tareas con sus usuarios relacionados
-        $completedTasks = Tasks::where('id_empresa', $user->id)
-            ->where('status', 'completed')
+        $completadaTasks = Tasks::where('id_empresa', $user->id)
+            ->where('status', 'completada')
+            ->where('paid', false)           
             ->join('users', 'tasks.id_usuario', '=', 'users.id')  // Unimos con la tabla users
             ->select('tasks.*', 'users.name as usuario_nombre')  // Seleccionamos los campos que necesitamos
             ->get();
         
-        return view('empresa.walletNear.near', compact('user', 'completedTasks'));
+        return view('empresa.walletNear.near', compact('user', 'completadaTasks'));
     }
     
+    public function pagar_tarea(Request $request, $id)
+    {
+        try {
+            // Obtain the task by ID
+            $task = Tasks::findOrFail($id);
+    
+            // Update the task status to paid
+            $task->paid = true;
+            $task->save();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Task marked as paid successfully',
+                'task' => $task
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while marking the task as paid: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+        
 }

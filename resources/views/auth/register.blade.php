@@ -208,7 +208,7 @@
                     function mostrarPosicion(position) {
                         const latitud = position.coords.latitude;
                         const longitud = position.coords.longitude;
-                        document.getElementById("location").value = `${latitud},${longitud}`; 
+                        document.getElementById("location").value = `${latitud},${longitud}`; // Almacena latitud y longitud
                         obtenerDireccion(latitud, longitud);
                     }
                 

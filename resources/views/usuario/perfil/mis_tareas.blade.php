@@ -24,7 +24,7 @@
                     <span class="info-box-icon bg-info"><i class="fas fa-clock"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Tareas Activas</span>
-                        <span class="info-box-number">{{ $acceptedTasksCount }}</span>
+                        <span class="info-box-number">{{ $aceptadaTasksCount }}</span>
                     </div>
                 </div>
             </div>
@@ -34,7 +34,7 @@
                     <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Tareas Completadas</span>
-                        <span class="info-box-number">{{ $completedTasksCount }}</span>
+                        <span class="info-box-number">{{ $completadaTasksCount }}</span>
                     </div>
                 </div>
             </div>
@@ -51,10 +51,10 @@
                         <div class="col-md-4">
                             <select name="status" class="form-control" onchange="this.form.submit()">
                                 <option value="" {{ request('status') == '' ? 'selected' : '' }}>Todos los estados</option>
-                                <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>
+                                <option value="aceptada" {{ request('status') == 'aceptada' ? 'selected' : '' }}>
                                     Pendientes
                                 </option>
-                                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
+                                <option value="completada" {{ request('status') == 'completada' ? 'selected' : '' }}>
                                     Completadas
                                 </option>
                             </select>
@@ -70,6 +70,7 @@
                             <tr>
                                 <th>Tarea</th>
                                 <th>Estado</th>
+                                <th>Empresa</th>
                                 <th>Fecha</th>
                                 <th>Acciones</th>
                             </tr>
@@ -79,20 +80,23 @@
                                 <tr>
                                     <td><strong>{{ $task->title }}</strong></td>
                                     <td>
-                                        @if($task->status === 'accepted')
-                                            <span class="badge badge-info">{{ $task->status }}</span> <!-- Azul para 'accepted' -->
-                                        @elseif($task->status === 'completed')
-                                            <span class="badge badge-success">{{ $task->status }}</span> <!-- Verde para 'completed' -->
-                                        @else
-                                            <span class="badge badge-secondary">{{ $task->status }}</span> <!-- Color neutro para otros estados -->
-                                        @endif
+                                        <span class="status-{{ strtolower($task->status) }}">
+                                            {{ $statusTranslations[$task->status] ?? $task->status }} 
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong>
+                                            <a href="{{ route('ver_perfil_empresa', ['id' => $task->empresa->id]) }}" class="text-primary">
+                                                {{ $task->empresa->name }}
+                                            </a>
+                                        </strong>
                                     </td>
                                     <td>Empieza:
                                         {{ \Carbon\Carbon::parse($task->start_date)->format('d/m/Y') }} Vence:
                                         {{ \Carbon\Carbon::parse($task->end_date)->format('d/m/Y') }}
                                     </td>
                                     <td>
-                                        @if(strtolower($task->status) === 'accepted')
+                                        @if(strtolower($task->status) === 'aceptada')
                                             <button type="button" class="btn btn-primary btn-sm view-task-button" data-id="{{ $task->id }}">
                                                 Ver tarea
                                             </button>
@@ -214,7 +218,7 @@
                             Cerrar
                         </button>
                         <button type="button" 
-                                class="btn btn-success markAsCompletedAlert" 
+                                class="btn btn-success markAscompletadaAlert" 
                                 data-id="{{ $task->id }}" 
                                 data-location="{{ $task->empresa->location }}">
                             Marcar como completada
@@ -230,137 +234,153 @@
 
 @section('css')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+    /* Estilo para el estado 'aceptada' */
+.status-aceptada {
+    background-color: #cce5ff; /* Fondo azul claro */
+    color: #004085;            /* Texto azul oscuro */
+    font-weight: bold;         /* Negrita */
+    padding: 5px 10px;        /* Espaciado interno */
+    border-radius: 5px;       /* Bordes redondeados */
+}
 
+/* Estilo para el estado 'completada' */
+.status-completada {
+    background-color: #d4edda; /* Fondo verde claro */
+    color: #155724;            /* Texto verde oscuro */
+    font-weight: bold;         /* Negrita */
+    padding: 5px 10px;        /* Espaciado interno */
+    border-radius: 5px;       /* Bordes redondeados */
+}
+
+</style>
 @stop
 
 @section('js')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
-$(document).ready(function() {
-    $('.view-task-button').on('click', function() {
-        let taskId = $(this).data('id'); // Obtener el id de la tarea
+        $(document).ready(function() {
+            $('.view-task-button').on('click', function() {
+                let taskId = $(this).data('id'); // Obtener el id de la tarea
 
-        // Generar la URL sin duplicar el prefijo usando el helper de Laravel
-        let url = "{{ route('tareas.detalle', ['id' => ':id']) }}".replace(':id', taskId);
+                // Generar la URL sin duplicar el prefijo usando el helper de Laravel
+                let url = "{{ route('tareas.detalle', ['id' => ':id']) }}".replace(':id', taskId);
 
-        // Realizar la solicitud AJAX para obtener los detalles de la tarea
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function(response) {
-                // Llenar el modal con los datos obtenidos de la respuesta
-                $('#taskTitle').text(response.title);
-                $('#taskDescription').text(response.description);
-                
-                // Formatear las fechas
-                const startDate = new Date(response.start_date);
-                const endDate = new Date(response.end_date);
-                
-                const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-                const formattedStartDate = startDate.toLocaleDateString('es-ES', options);
-                const formattedEndDate = endDate.toLocaleDateString('es-ES', options);
-                
-                $('#taskDate').text(`${formattedStartDate} - ${formattedEndDate}`);
-                
-                // Calcular la duración en días
-                const durationInDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
-                $('#taskDuration').text(`${durationInDays} días`);
-
-                $('#nombre_empresa').text(response.nombre_empresa);
-                $('#taskPrice').text(response.price);
-                $('#taskLocation').text(response.location);
-                $('#reward').text(response.reward);
-                $('#location_empresa').text(response.location_empresa);
-
-                // Actualiza el ID del botón "Marcar como completada" con el ID correcto
-                $('.markAsCompletedAlert').data('id', taskId);
-
-                $('#taskDetailModal').modal('show');
-            },
-            error: function() {
-                alert('Error al obtener los detalles de la tarea');
-            }
-        });
-    });
-});
-
-    </script>
-    <script>
-$(document).ready(function() {
-    // Cambiar de #markAsCompletedAlert a .markAsCompletedAlert
-    $('.markAsCompletedAlert').on('click', function() {
-        // Obtener la ubicación y el ID de la tarea desde los atributos data
-        let locationEmpresa = $(this).data('location').trim();
-        let taskId = $(this).data('id');
-
-        // Crear contenido para mostrar en el Swal
-        let mapHtml;
-        if (locationEmpresa && locationEmpresa.includes(',')) {
-            // Si location_empresa tiene coordenadas
-            const coords = locationEmpresa.split(',');
-            const latitude = coords[0].trim();
-            const longitude = coords[1].trim();
-
-            mapHtml = `
-                <p>¿Quieres marcar esta tarea como completada? Necesitarás entregar la evidencia de forma presencial.</p>
-                <a href="https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}" target="_blank" class="btn btn-link">
-                    Ver ubicación de la empresa
-                </a>
-            `;
-        } else {
-            // Si location_empresa no tiene coordenadas, se usa como dirección
-            mapHtml = `
-                <p>¿Quieres marcar esta tarea como completada? Necesitarás entregar la evidencia de forma presencial.</p>
-                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationEmpresa)}" target="_blank" class="btn btn-link">
-                    Ver ubicación
-                </a>
-            `;
-        }
-
-        // Configurar el SweetAlert con el contenido de ubicación
-        Swal.fire({
-            title: '¿Estás seguro?',
-            html: mapHtml,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#dc3545',
-            confirmButtonText: 'Sí, marcar como completada',
-            cancelButtonText: 'No, cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Hacer la llamada AJAX para completar la tarea
+                // Realizar la solicitud AJAX para obtener los detalles de la tarea
                 $.ajax({
-                    url: `/usuario/perfil/tareas/completar_tarea/${taskId}`,
-                    type: 'POST',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        _method: 'PUT' // Especificar el método como PUT
-                    },
+                    url: url,
+                    type: 'GET',
                     success: function(response) {
-                        Swal.fire({
-                            title: '¡Éxito!',
-                            text: 'La tarea ha sido marcada como completada',
-                            icon: 'success'
-                        }).then(() => {
-                            window.location.reload(); // Recargar la página para ver los cambios
-                        });
+                        // Llenar el modal con los datos obtenidos de la respuesta
+                        $('#taskTitle').text(response.title);
+                        $('#taskDescription').text(response.description);
+                        
+                        // Formatear las fechas
+                        const startDate = new Date(response.start_date);
+                        const endDate = new Date(response.end_date);
+                        
+                        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                        const formattedStartDate = startDate.toLocaleDateString('es-ES', options);
+                        const formattedEndDate = endDate.toLocaleDateString('es-ES', options);
+                        
+                        $('#taskDate').text(`${formattedStartDate} - ${formattedEndDate}`);
+                        
+                        // Calcular la duración en días
+                        const durationInDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+                        $('#taskDuration').text(`${durationInDays} días`);
+
+                        $('#nombre_empresa').text(response.nombre_empresa);
+                        $('#taskPrice').text(response.price);
+                        $('#taskLocation').text(response.location);
+                        $('#reward').text(response.reward);
+                        $('#location_empresa').text(response.location_empresa);
+
+                        // Actualiza el ID del botón "Marcar como completada" con el ID correcto
+                        $('.markAscompletadaAlert').data('id', taskId);
+
+                        $('#taskDetailModal').modal('show');
                     },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', xhr.responseText);
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'Ocurrió un error al completar la tarea',
-                            icon: 'error'
+                    error: function() {
+                        alert('Error al obtener los detalles de la tarea');
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function() {
+            // Cambiar de #markAscompletadaAlert a .markAscompletadaAlert
+            $('.markAscompletadaAlert').on('click', function() {
+                // Obtener la ubicación y el ID de la tarea desde los atributos data
+                let locationEmpresa = $(this).data('location').trim();
+                let taskId = $(this).data('id');
+
+                // Crear contenido para mostrar en el Swal
+                let mapHtml;
+                if (locationEmpresa && locationEmpresa.includes(',')) {
+                    // Si location_empresa tiene coordenadas
+                    const coords = locationEmpresa.split(',');
+                    const latitude = coords[0].trim();
+                    const longitude = coords[1].trim();
+
+                    mapHtml = `
+                        <p>¿Quieres marcar esta tarea como completada? Necesitarás entregar la evidencia de forma presencial.</p>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}" target="_blank" class="btn btn-link">
+                            Ver ubicación de la empresa
+                        </a>
+                    `;
+                } else {
+                    // Si location_empresa no tiene coordenadas, se usa como dirección
+                    mapHtml = `
+                        <p>¿Quieres marcar esta tarea como completada? Necesitarás entregar la evidencia de forma presencial.</p>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationEmpresa)}" target="_blank" class="btn btn-link">
+                            Ver ubicación
+                        </a>
+                    `;
+                }
+
+                // Configurar el SweetAlert con el contenido de ubicación
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    html: mapHtml,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#dc3545',
+                    confirmButtonText: 'Sí, marcar como completada',
+                    cancelButtonText: 'No, cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Hacer la llamada AJAX para completar la tarea
+                        $.ajax({
+                            url: `/usuario/perfil/tareas/completar_tarea/${taskId}`,
+                            type: 'POST',
+                            data: {
+                                _token: $('meta[name="csrf-token"]').attr('content'),
+                                _method: 'PUT' // Especificar el método como PUT
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    title: '¡Éxito!',
+                                    text: 'La tarea ha sido marcada como completada',
+                                    icon: 'success'
+                                }).then(() => {
+                                    window.location.reload(); // Recargar la página para ver los cambios
+                                });
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error:', xhr.responseText);
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: 'Ocurrió un error al completar la tarea',
+                                    icon: 'error'
+                                });
+                            }
                         });
                     }
                 });
-            }
+            });
         });
-    });
-});
     </script>
 @stop

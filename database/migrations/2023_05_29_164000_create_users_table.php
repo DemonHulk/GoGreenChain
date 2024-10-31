@@ -22,15 +22,13 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('address'); // Dirección completa
-            $table->string('city'); // Ciudad
-            $table->string('state'); // Estado
-            $table->string('phone'); // Número de teléfono
+            $table->string('address'); // Address
+            $table->string('city'); // City
+            $table->string('state'); // State
+            $table->string('phone'); // Phone
             $table->string('postal_code'); // Código Postal
             $table->string('location');
-            $table->string('username_wallet'); //Nombre del usuario del wallet
-            $table->string('id_wallet'); //ID del wallet
-            $table->boolean('active')->default(true); // Estado de la empresa
+            $table->string('username_wallet'); // Username wallet
             $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable(); 
@@ -38,29 +36,28 @@ return new class extends Migration
             $table->timestamps();
         });
             
-        // Obtén los registros de roles
+        // Get the roles
         $administradorRol = RolModelo::where('id_rol', 1)->first();
         $empresaRol = RolModelo::where('id_rol', 2)->first();
         $usuarioRol = RolModelo::where('id_rol', 3)->first();
 
-            // Crear usuario con rol de Administrador
+            // Create user with admin role
             User::create([
                 'id_rol' => $administradorRol->id_rol,
-                'name' => 'Administrador',
-                'username' => 'Administrador',
-                'email' => 'Administrador@gmail.com',
-                'password' => bcrypt('Administrador'),
+                'name' => 'Admin',
+                'username' => 'Admin',
+                'email' => 'Admin@gmail.com',
+                'password' => bcrypt('Admin'),
                 'address' => 'Calle Falsa 123',
                 'city' => 'Ciudad Admin',
                 'state' => 'Estado Admin',
                 'phone' => '1122334455',   
                 'postal_code' => '54321',
                 'location' => '21.800174588382458, -105.20558786763493',
-                'username_wallet' => 'admin_wallet',
-                'id_wallet' => 'wallet_1'    
+                'username_wallet' => 'test.tesnet'  
             ]);
     
-            // Crear usuario con rol de Empresa
+            // Create user with Enterprise role
             User::create([
                 'id_rol' => $empresaRol->id_rol,
                 'name' => 'Empresa',
@@ -73,11 +70,10 @@ return new class extends Migration
                 'phone' => '1122334455',
                 'postal_code' => '54321',
                 'location' => '21.800174588382458, -105.20558786763493',
-                'username_wallet' => 'empresa_wallet',
-                'id_wallet' => 'wallet_2'    
+                'username_wallet' => 'test.tesnet'
             ]);
 
-            // Crear usuario con rol de Usuario
+            // Create user with User role
             User::create([
                 'id_rol' => $usuarioRol->id_rol,
                 'name' => 'Usuario',
@@ -90,8 +86,7 @@ return new class extends Migration
                 'phone' => '1122334455', 
                 'postal_code' => '54321',
                 'location' => '21.800174588382458, -105.20558786763493',
-                'username_wallet' => 'usuario_wallet',
-                'id_wallet' => 'wallet_3'    
+                'username_wallet' => 'test.testnet' 
             ]);
 
 

@@ -14,6 +14,12 @@
               <p class="lead">
                   Únete a nuestra plataforma y contribuye a un mundo más verde mientras ganas recompensas.
               </p>
+                <!-- Call to Action -->
+                <div class="col-md-12 text-center mb-4">
+                    <a href="{{ route('login') }}" class="btn btn-lg btn-success">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </a>
+                </div>
               <div class="btn-group">
                   <a href="{{ route('register') }}" class="btn btn-primary btn-lg mx-2">
                   <i class="fas fa-building mr-2"></i>Regístrate como Empresa
@@ -126,13 +132,6 @@
                       </div>
                   </div>
               </div>
-          </div>
-
-          <!-- Call to Action -->
-          <div class="col-md-12 text-center mb-4">
-              <a href="{{ route('login') }}" class="btn btn-lg btn-success">
-                  <i class="fas fa-sign-in-alt mr-2"></i>Comienza Ahora
-              </a>
           </div>
       </div>
   </div>

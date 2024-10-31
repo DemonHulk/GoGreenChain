@@ -85,7 +85,7 @@ return [
     'auth_logo' => [
         'enabled' => false,
         'img' => [
-            'path' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
+            'path' => '/storage/gogreenchain.png',
             'alt' => 'Auth Logo',
             'class' => '',
             'width' => 50,

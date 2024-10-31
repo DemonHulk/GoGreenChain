@@ -29,32 +29,45 @@
 
         <!-- Action Buttons -->
         <div class="row">
+            @if (auth()->user()->rol->tipo === 'Empresa')
             <div class="col-md-6">
-                <div class="text-center mb-3">
-                    <a href="{{ route('usuario.perfil.ver_tareas') }}" class="btn btn-primary btn-lg btn-block">
-                        <i class="fas fa-list-ul mr-2"></i>
-                        Ver Tareas
-                    </a>
+                    <div class="text-center mb-3">
+                        <a href="{{ route('empresa.perfil.ver_tareas') }}" class="btn btn-primary btn-lg btn-block">
+                            <i class="fas fa-list-ul mr-2"></i>
+                            Ver Tareas de Empresas
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="text-center mb-3">
-                    <a href="{{ route('usuario.perfil.mis_tareas') }}" class="btn btn-success btn-lg btn-block">
-                        <i class="fas fa-history mr-2"></i>
-                        Ver Mis Tareas
-                    </a>
+                <div class="col-md-6">
+                    <div class="text-center mb-3">
+                        <a href="{{ route('empresa.walletNear.near') }}" class="btn btn-success btn-lg btn-block">
+                            <i class="fas fa-wallet mr-2"></i>
+                            Ver Wallet de la Empresa
+                        </a>
+                    </div>
                 </div>
-            </div>
+            @else
+                <div class="col-md-6">
+                    <div class="text-center mb-3">
+                        <a href="{{ route('usuario.perfil.ver_tareas') }}" class="btn btn-primary btn-lg btn-block">
+                            <i class="fas fa-list-ul mr-2"></i>
+                            Ver Tareas
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-center mb-3">
+                        <a href="{{ route('usuario.perfil.mis_tareas') }}" class="btn btn-success btn-lg btn-block">
+                            <i class="fas fa-history mr-2"></i>
+                            Ver Mis Tareas
+                        </a>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </div>
 
-<!-- Initialize tooltips -->
-<script>
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-})
-</script>
 
 @stop
 
@@ -62,18 +75,5 @@ $(function () {
 @stop
 
 @section('js')
-<script>
-  $(document).ready(function() {
-    // Initialize the modal
-    $('#taskDetailModal').modal({
-      show: false
-    });
-  
-    // Handle the "Ver tarea" button click
-    $('.button.btn-primary').click(function() {
-      $('#taskDetailModal').modal('show');
-    });
-  });
-  </script>
 
 @stop

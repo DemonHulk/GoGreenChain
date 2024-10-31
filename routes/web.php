@@ -69,8 +69,8 @@ Route::prefix('usuario/perfil')->middleware(['auth', 'can:Usuario'])->group(func
     Route::put('/tareas/aceptar/{id}', [UsuarioControlador::class, 'aceptar_tarea_usuario'])->name('tarea.aceptar');
 
     Route::get('/tareas/detalle/{id}', [UsuarioControlador::class, 'getTaskDetails'])->name('tareas.detalle');
-    Route::put('tareas/completar_tarea/{id}', [UsuarioControlador::class, 'completar_tarea'])
-        ->name('tarea.completar_tarea');
+    Route::put('tareas/completar_tarea/{id}', [UsuarioControlador::class, 'completar_tarea'])->name('tarea.completar_tarea');
+    Route::get('/empresa/{id}/perfil', [UsuarioControlador::class, 'ver_perfil_empresa'])->name('ver_perfil_empresa');
 
 });
 
@@ -89,6 +89,7 @@ Route::prefix('empresa/perfil')->middleware(['auth', 'can:Empresa'])->group(func
     Route::get('/ver_tareas', [UsuarioControlador::class, 'ver_tareas'])->name('empresa.perfil.ver_tareas');
     Route::get('/empresa/perfil/tarea/{id}', [UsuarioControlador::class, 'obtenerTarea'])->name('empresa.perfil.obtenerTarea');
 
+    Route::get('/usuario/{id}/perfil', [UsuarioControlador::class, 'ver_perfil_usuario'])->name('ver_perfil');
 
 
     Route::post('/guardar_tarea', [UsuarioControlador::class, 'guardar_tarea'])->name('guardar_tarea');
@@ -101,6 +102,7 @@ Route::prefix('empresa/walletNear')->middleware(['auth', 'can:Empresa'])->group(
 
 
     Route::get('/near', [UsuarioControlador::class, 'near_vista'])->name('empresa.walletNear.near');
+    Route::put('tareas/pagar_tarea/{id}', [UsuarioControlador::class, 'pagar_tarea'])->name('tarea.pagar_tarea');
 
 
 });

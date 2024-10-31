@@ -39,7 +39,6 @@ class User extends Authenticatable
         'phone',
         'location',
         'username_wallet',
-        'id_wallet',
         'active',
         'profile_photo_path'
     ];

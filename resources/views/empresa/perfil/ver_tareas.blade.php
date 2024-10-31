@@ -24,7 +24,7 @@
                     <span class="info-box-icon bg-warning"><i class="fas fa-clock"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Tareas Activas</span>
-                        <span class="info-box-number">{{ $pendingAssignedCount + $pendingUnassignedCount }}</span> <!-- Total de tareas pendientes -->
+                        <span class="info-box-number">{{ $pendienteCount + $aceptadaCount  }}</span> <!-- Total de tareas pendientes -->
                     </div>
                 </div>
             </div>
@@ -34,7 +34,7 @@
                     <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Tareas Completadas</span>
-                        <span class="info-box-number">{{ $completedCount }}</span> <!-- Total de tareas completadas -->
+                        <span class="info-box-number">{{ $completadaCount }}</span> <!-- Total de tareas completadas -->
                     </div>
                 </div>
             </div>
@@ -44,77 +44,64 @@
             <div class="card-header">
                 <h3 class="card-title">Lista de Tareas</h3>
                 
-                <!-- Filtros -->
-                <div class="mt-3">
-                    <form action="{{ route('empresa.perfil.ver_tareas') }}" method="GET" class="row">
-                        <div class="col-md-4">
-                            <select name="status" class="form-control" onchange="this.form.submit()">
-                                <option value="">Todos los estados</option>
-                                <option value="pending_unassigned" {{ request('status') == 'pending_unassigned' ? 'selected' : '' }}>
-                                    Pendientes sin asignar ({{ $pendingUnassignedCount }})
-                                </option>
-                                <option value="pending_assigned" {{ request('status') == 'pending_assigned' ? 'selected' : '' }}>
-                                    Pendientes asignadas ({{ $pendingAssignedCount }})
-                                </option>
-                                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
-                                    Completadas ({{ $completedCount }})
-                                </option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
+            <!-- Filtros -->
+            <div class="mt-3">
+                <form action="{{ route('empresa.perfil.ver_tareas') }}" method="GET" class="row">
+                    <div class="col-md-4">
+                        <select name="status" class="form-control" onchange="this.form.submit()">
+                            <option value="">Todos los estados</option>
+                            <option value="pendiente" {{ request('status') == 'pendiente' ? 'selected' : '' }}>
+                                Pendientes sin asignar ({{ $pendienteCount }})
+                            </option>
+                            <option value="aceptada" {{ request('status') == 'aceptada' ? 'selected' : '' }}>
+                                Pendientes asignadas ({{ $aceptadaCount }})
+                            </option>
+                            <option value="completada" {{ request('status') == 'completada' ? 'selected' : '' }}>
+                                Completadas ({{ $completadaCount }})
+                            </option>
+                        </select>
+                    </div>
+                </form>
             </div>
-            
+
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th style="width: 40px;"></th>
                                 <th>Tarea</th>
                                 <th>Estado</th>
-                                <th>Fecha</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($tasks as $task)
-                            <tr>
-                                <td>
-                                    <div class="icheck-primary">
-                                        <input type="checkbox" 
-                                               id="task{{ $task->id }}" 
-                                               {{ $task->status == 'completed' ? 'checked' : '' }}
-                                               {{ $task->status == 'completed' ? 'disabled' : '' }}>
-                                        <label for="task{{ $task->id }}"></label>
-                                    </div>
-                                </td>
-                                <td>
-                                    <strong>{{ $task->title }}</strong><br>
-                                    {{ $task->description }}
-                                </td>
-                                <td>
-                                    @if($task->status == 'completed')
-                                        <span class="badge badge-success">Completada</span>
-                                    @elseif($task->id_usuario)
-                                        <span class="badge badge-info">Pendiente - Asignada</span>
-                                    @else
-                                        <span class="badge badge-warning">Pendiente - Sin asignar</span>
-                                    @endif
-                                </td>
-                                <td class="text-right text-muted">
-                                    <small>
-                                        {{ $task->status == 'completed' 
-                                            ? 'Completado el ' . $task->updated_at->format('d M, Y') 
-                                            : 'Vence ' . $task->end_date->format('d M, Y') }}
-                                    </small>
-                                </td>
-                                <td>
-                                    @if($task->status == 'completed')
-                                        <button type="button" class="btn btn-success btn-sm">
-                                            Finalizado
-                                        </button>
-                                    @else
+                                <tr>
+                                    <td>
+                                        <strong>{{ $task->title }}</strong><br>
+                                        {{ $task->description }}
+                                    </td>
+                                    <td>
+                                        @php
+                                            $status = strtolower($task->status);
+                                            $statusClass = in_array($status, ['pendiente', 'aceptada', 'completada']) ? $status : 'default';
+                                        @endphp
+                                    
+                                        <span class="status-{{ $statusClass }}">
+                                            {{ ucfirst($task->status) }}
+                                        </span>
+                                    
+                                        {{-- Mostrar el usuario si el estado es "aceptada" o "completada" --}}
+                                        @if($status === 'aceptada' || $status === 'completada')
+                                            <span class="ml-2 text-muted">
+                                                por <a href="{{ route('ver_perfil', ['id' => $task->usuario->id]) }}" class="text-primary">
+                                                    {{ $task->usuario->name }}
+                                                </a>
+                                    
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td>
                                         <button type="button" 
                                                 class="btn btn-primary btn-sm"
                                                 data-toggle="modal" 
@@ -123,16 +110,15 @@
                                                 onclick="loadTaskDetails({{ $task->id }})">
                                             Ver tarea
                                         </button>
-                                    @endif
-                                </td>
-                            </tr>
+                                    </td>
+                                </tr>
                             @empty
-                            <tr>
-                                <td colspan="5" class="text-center">No hay tareas que coincidan con los filtros</td>
-                            </tr>
+                                <tr>
+                                    <td colspan="5" class="text-center">No hay tareas que coincidan con los filtros</td>
+                                </tr>
                             @endforelse
                         </tbody>
-                    </table>
+                        </table>
                 </div>
             </div>
         </div>
@@ -182,16 +168,10 @@
                                         <div class="d-flex align-items-center justify-content-start">
                                             <div class="text-left">
                                                 <h6 class="mb-0">{{ $user->name }}</h6>
-                                                <small class="text-muted">{{ $user->completed_tasks_count }}</small>
                                             </div>
-                                            <img class="profile-user-img img-fluid img-circle mr-3"
-                                            src="{{ $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : asset('storage/default-profile.png') }}"
-                                            alt="Foto de perfil del cliente" 
-                                            style="width: 40px; height: 40px;">
                                         </div>
                                     </div>
                                 </div>
-            
                                 <div class="mt-4">
                                     <h5>Tipo de tarea</h5>
                                     <ul class="list-unstyled" id="taskRequirements">
@@ -209,18 +189,46 @@
             </div>
         </div>
         
-        
     </body>
 @stop
 
 
 @section('css')
+<style>
+    /* Estilo para el estado 'pendiente' */
+    .status-pendiente {
+    background-color: #ffeeba; /* Fondo amarillo claro */
+    color: #856404;            /* Texto marrón oscuro */
+    font-weight: bold;         /* Negrita */
+    padding: 5px 10px;        /* Espaciado interno */
+    border-radius: 5px;       /* Bordes redondeados */
+    }
+
+    /* Estilo para el estado 'aceptada' */
+    .status-aceptada {
+        background-color: #cce5ff; /* Fondo azul claro */
+        color: #004085;            /* Texto azul oscuro */
+        font-weight: bold;         /* Negrita */
+        padding: 5px 10px;        /* Espaciado interno */
+        border-radius: 5px;       /* Bordes redondeados */
+    }
+
+    /* Estilo para el estado 'completada' */
+    .status-completada {
+        background-color: #d4edda; /* Fondo verde claro */
+        color: #155724;            /* Texto verde oscuro */
+        font-weight: bold;         /* Negrita */
+        padding: 5px 10px;        /* Espaciado interno */
+        border-radius: 5px;       /* Bordes redondeados */
+    }
+</style>
 @stop
 
 @section('js')
     <script src="https://kit.fontawesome.com/42813926db.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -259,8 +267,6 @@
                         </a>
                     `);
 
-                    $('#clientName').text(task.id_empresa); 
-                    $('#taskRequirements').html('<li>' + task.task_type + '</li>'); // Ajustar según los requisitos
 
                     // Mostrar el modal
                     $('#taskDetailModal').modal('show');
@@ -271,5 +277,4 @@
             });
         }
     </script>
-    
 @stop

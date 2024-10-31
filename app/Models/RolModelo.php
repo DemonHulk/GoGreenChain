@@ -14,7 +14,7 @@ class RolModelo extends Model
     public $timestamps = true;
     protected $fillable = ['tipo'];
 
-    public function usuarios()
+    public function users()
     {
         return $this->hasMany(User::class, 'id_rol');
     }

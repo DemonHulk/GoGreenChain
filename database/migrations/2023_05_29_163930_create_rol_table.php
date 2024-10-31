@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        RolModelo::create(['tipo' => 'Administrador']);
+        RolModelo::create(['tipo' => 'Administrator']);
         RolModelo::create(['tipo' => 'Empresa']);
         RolModelo::create(['tipo' => 'Usuario']);
     }

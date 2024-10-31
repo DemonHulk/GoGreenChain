@@ -7,6 +7,7 @@
 
 @section('content')
     <script src="https://cdn.jsdelivr.net/npm/near-api-js@2.1.3/dist/near-api-js.min.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <div class="card card-primary card-outline my-4">
         <div class="card-header">
@@ -56,7 +57,7 @@
     <div class=" sesion">
         <h2 class="display-5 font-weight-bold mb-4 sesion">Pagar tareas completadas.</h2>
         <div id="completed-tasks">
-            @if ($completedTasks->isEmpty())
+            @if ($completadaTasks->isEmpty())
                 <p>No hay tareas completadas.</p>
             @else
                 <table class="table table-bordered table-hover bg-white">
@@ -68,7 +69,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($completedTasks as $task)
+                        @foreach ($completadaTasks as $task)
                             <tr>
                                 <td>{{ $task->title }}</td>
                                 <td>{{ $task->usuario->name }}</td>
@@ -177,7 +178,7 @@
             }
         }
 
-        async function sendPayment(wallet, cuenta, tarea, cantidad) {
+        async function sendPayment(wallet, cuenta, id, tarea,cantidad) {
             const account = wallet.account();
             const balance = await account.getAccountBalance();
             const availableBalance = nearApi.utils.format.formatNearAmount(balance.available);
@@ -188,6 +189,8 @@
             }
 
             try {
+                await marcarTareaComoPagada(id);
+
                 const result = await account.functionCall({
                     contractId: 'paymentchicha.testnet',
                     methodName: 'pay',
@@ -203,6 +206,24 @@
             } catch (error) {
                 console.error('Error al realizar el pago:', error);
                 // document.getElementById('status').textContent = 'Error al realizar el pago: ' + error.message;
+            }
+        }
+
+        async function marcarTareaComoPagada(id) {
+            try {
+                const response = await fetch(`/empresa/walletNear/tareas/pagar_tarea/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ pagado: true })
+                });
+
+                const data = await response.json();
+
+            } catch (error) {
+                console.error('Error while marking the task as paid in the backend:', error);
             }
         }
 
@@ -265,33 +286,39 @@
             }
         }
 
-        async function getCompletedTasks() {
+        async function getcompletadaTasks() {
             try {
                 const nearPriceMXN = await getNearMXN();
 
-                const completedTasks = @json($completedTasks);
+                const completadaTasks = @json($completadaTasks);
 
                 // Crear la tabla HTML
                 let tableHtml = '<table class="table table-bordered table-hover bg-white">';
-                tableHtml += '<thead><tr><th>Título</th><th>Usuario</th><th>wallet</th><th>Recompensa</th><th>Pagar</th></tr></thead>';
+                tableHtml += '<thead><tr><th>ID</th><th>Título</th><th>Usuario</th><th>wallet</th><th>Recompensa</th><th>Pagar</th></tr></thead>';
                 tableHtml += '<tbody>';
 
-                completedTasks.forEach(task => {
+                if (completadaTasks.length === 0) {
+                    tableHtml += `<tr><td colspan="6" class="text-center">No hay tareas completadas pendientes de pago.</td></tr>`;
+                } else {
+                completadaTasks.forEach(task => {
                     tableHtml += `<tr>
+                        <td>${task.id}</td>
                         <td>${task.title}</td>
                         <td>${task.usuario ? task.usuario.name : 'Sin asignar'}</td>
                         <td>${task.usuario ? task.usuario.username_wallet : 'Sin asignar'}</td>
                         <td>${parseFloat(task.reward).toFixed(2)} NEAR ($${(parseFloat(parseFloat(task.reward).toFixed(2)) * nearPriceMXN).toFixed(2)} MXN)</td>
                         <td>
                             <button class="btn btn-primary pagar-tarea"
-                                    data-username-wallet="${task.usuario.username_wallet}"
+                                    data-username-wallet="${task.usuario ? task.usuario.username_wallet : 'Sin asignar'}"
                                     data-title="${task.title}"
+                                    data-id="${task.id}"
                                     data-reward="${parseFloat(task.reward).toFixed(2)}">
                                 Pagar
                             </button>
                         </td>
                     </tr>`;
                 });
+                }
 
                 tableHtml += '</tbody></table>';
 
@@ -305,7 +332,7 @@
 
 
         // Llamar a la función cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', getCompletedTasks);
+        document.addEventListener('DOMContentLoaded', getcompletadaTasks);
 
         async function updateUI(wallet) {
             var sesion = document.getElementsByClassName('sesion');
@@ -378,9 +405,10 @@
                 if (event.target.classList.contains('pagar-tarea')) {
                     const button = event.target;
                     const cuenta = button.getAttribute('data-username-wallet');
+                    const id = button.getAttribute('data-id');
                     const tarea = button.getAttribute('data-title');
                     const cantidad = button.getAttribute('data-reward');
-                    sendPayment(wallet, cuenta, tarea, cantidad);
+                    sendPayment(wallet, cuenta, id,tarea, cantidad);
 
                 }
             });

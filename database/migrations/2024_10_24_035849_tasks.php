@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_empresa')->constrained('users')->onDelete('cascade');
-            $table->foreignId('id_usuario')->nullable()->constrained('users')->onDelete('cascade');
+            $table->foreignId('id_enterprise')->constrained('users')->onDelete('cascade');
+            $table->foreignId('id_user')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('title'); // nombre de la tarea
             $table->string('description'); // Descripción de la tarea
             $table->date('start_date'); // Fecha de inicio
@@ -22,8 +22,8 @@ return new class extends Migration
             $table->decimal('reward', 10, 2); // Recompensa en tokens
             $table->string('location'); // Ubicación de la tarea
             $table->enum('task_type', ['Servicio Comunitario', 'Ambiental', 'Educativa', 'Técnica']); // Tipo de tarea
-            $table->enum('status', ['pending', 'accepted' ,'completed'])->default('pending'); // Estado de la tarea
-            $table->boolean('pagado')->default(false); // Indica si la tarea ha sido pagada
+            $table->enum('status', ['pendiente', 'aceptada' ,'completada'])->default('pendiente'); // Estado de la tarea
+            $table->boolean('paid')->default(false); // Indica si la tarea ha sido pagada
             $table->timestamps(); // Timestamps para las fechas de creación y actualización
         });
     }

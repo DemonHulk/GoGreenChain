@@ -40,7 +40,7 @@ class tasksFactory extends Factory
             'reward' => $this->faker->randomFloat(2, 0.1, 15), // Recompensa aleatoria entre 0.1 a 15
             'location' => $this->faker->randomElement($locations), // Ubicación aleatoria cercana
             'task_type' => $this->faker->randomElement(['Servicio Comunitario', 'Ambiental', 'Educativa', 'Técnica']), // Tipo de tarea aleatorio
-            'status' => $this->faker->randomElement(['pending']), // Estado aleatorio
+            'status' => $this->faker->randomElement(['pendiente']), // Estado aleatorio
         ];
     }
 
