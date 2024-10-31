@@ -30,7 +30,7 @@ Base de Datos: MySQL
 Autenticación y Seguridad: Laravel Auth, Gates y Policies para control de acceso.
 Tokens: Implementación de sistema de recompensas con tokens a través de integración con la API de Near Wallet.
 Requisitos
-PHP >= 7.4
+PHP >= 8.2.4
 Composer
 MySQL
 Node.js y npm
@@ -39,37 +39,32 @@ Instalación
 Clona este repositorio:
 
 bash
-Copiar código
 git clone https://github.com/DemonHulk/GoGreenChain
 Accede al directorio del proyecto:
 
 bash
-Copiar código
 cd proyecto-tareas
 Instala las dependencias de PHP:
 
 bash
-Copiar código
 composer install
 Instala las dependencias de Node.js:
 
 bash
-Copiar código
 npm install
 Crea un archivo .env y configura las variables de entorno (copia el .env.example):
 
 bash
-Copiar código
 cp .env.example .env
 Asegúrate de configurar tu base de datos y los detalles de Near Wallet en el archivo .env.
 
 Genera la clave de la aplicación:
 
 bash
-Copiar código
 php artisan key:generate
 
 --------------------CONFIGURACIONES IMPORTANTES--------------------
+
 Para poder inicializar el proyecto debemos generar unos permisos en postgres
 -- Crear el usuario con su contraseña
 CREATE USER gogreenchain_user WITH PASSWORD 'jkjrytuf*53sd';
