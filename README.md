@@ -66,6 +66,7 @@ php artisan key:generate
 --------------------CONFIGURACIONES IMPORTANTES--------------------
 
 Para poder inicializar el proyecto debemos generar unos permisos en postgres
+
 -- Crear el usuario con su contraseña
 CREATE USER gogreenchain_user WITH PASSWORD 'jkjrytuf*53sd';
 
