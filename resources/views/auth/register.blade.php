@@ -97,7 +97,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <x-label for="username_wallet" value="{{ __('Usuario de Wallet') }}" />
-                                <x-input id="username_wallet" class="block mt-1 w-full" type="text" name="username_wallet" :value="old('username_wallet')" placeholder="Usuario de wallet" />
+                                <x-input id="username_wallet" class="block mt-1 w-full" type="text" name="username_wallet" :value="old('username_wallet')" placeholder="Usar letras y números" />
                             </div>
                         </div>
                     </div>

@@ -109,13 +109,13 @@
                             </div>
 
                             <div class="form-group row">
-                                <label class="col-sm-3 col-form-label">Wallet Near</label>
+                                <label class="col-sm-3 col-form-label">Wallet Near (letras y números)</label>
                                 <div class="col-sm-9">
                                     <div class="input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="fas fa-wallet"></i></span>
                                         </div>
-                                        <input type="text" class="form-control" name="username_wallet" value="{{ $user->username_wallet }}" required>
+                                        <input type="text" pattern="^[a-zA-Z0-9]+$" class="form-control" name="username_wallet" value="{{ $user->username_wallet }}" required>
                                     </div>
                                 </div>
                             </div>

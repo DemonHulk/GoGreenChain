@@ -481,14 +481,14 @@ class UsuarioControlador extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string',
-            'username_wallet' => 'required|string|regex:/^[a-zA-Z0-9]+$/',
-            'address' => 'required|string',
-            'city' => 'required|string',
-            'state' => 'required|string',
-            'postal_code' => 'required|string',
-            'phone' => 'required|string',
-            'location' => 'required|string',
+            'name' => 'required|string|max:100', 
+            'username_wallet' => 'required|string|regex:/^[a-zA-Z0-9]+$/|max:30', 
+            'address' => 'required|string|max:255', 
+            'city' => 'required|string|max:100', 
+            'state' => 'required|string|max:100', 
+            'postal_code' => 'required|string|regex:/^\d{4,10}$/', 
+            'phone' => 'required|string|regex:/^\+?[0-9]{7,15}$/', 
+                    'location' => 'required|string',
             'password' => 'required|string'
         ]);
 
@@ -520,13 +520,13 @@ class UsuarioControlador extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'address' => 'required|string',
-            'city' => 'required|string',
-            'state' => 'required|string',
-            'postal_code' => 'required|string',
-            'phone' => 'required|string',
-            'username_wallet' => 'required|string|regex:/^[a-zA-Z0-9]+$/',
-            'location' => 'required|string', // Validación para la ubicación
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:100', 
+            'state' => 'required|string|max:100',
+            'postal_code' => 'required|string|regex:/^\d{4,10}$/',
+            'phone' => 'required|string|regex:/^\+?[0-9]{7,15}$/', 
+            'username_wallet' => 'required|string|regex:/^[a-zA-Z0-9]+$/|max:30', 
+            'location' => 'required|string', 
         ]);
 
         $usernameWallet = $request->input('username_wallet');

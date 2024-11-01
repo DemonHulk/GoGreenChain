@@ -109,8 +109,8 @@
                       </div>
 
                       <div class="form-group">
-                        <label>Wallet</label>
-                        <input type="text" name="username_wallet" class="form-control" value="{{ $user->username_wallet }}" required>
+                        <label>Wallet (letras y números)</label>
+                        <input type="text" name="username_wallet" pattern="^[a-zA-Z0-9]+$" class="form-control" value="{{ $user->username_wallet }}" required>
                     </div>
               
                       <div class="form-group">
