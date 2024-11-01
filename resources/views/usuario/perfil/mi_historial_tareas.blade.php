@@ -110,114 +110,6 @@
             </div>
         </div>
 
-        @if($tasks->isNotEmpty()) 
-        <div class="modal fade" id="taskDetailModal" tabindex="-1" role="dialog" aria-labelledby="taskDetailModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl" role="document">
-                <div class="modal-content">
-                    <!-- Modal Header -->
-                    <div class="modal-header bg-primary">
-                        <h4 class="modal-title" id="taskDetailModalLabel">
-                            <i class="fas fa-tasks mr-2"></i>
-                            Detalle de Tarea
-                        </h4>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-        
-                    <!-- Modal Body -->
-                    <div class="modal-body">
-                        <div class="card card-primary card-outline">
-                            <div class="card-body">
-                                <!-- Task Title -->
-                                <h3 class="text-primary" id="taskTitle"></h3>
-                                
-                                <!-- Task Description -->
-                                <div class="mt-4">
-                                    <h5 class="text-bold">
-                                        <i class="fas fa-file-alt mr-2"></i>
-                                        Descripción
-                                    </h5>
-                                    <p id="taskDescription" class="text-muted"></p>
-                                </div>
-
-                                <!-- Money Info Box -->
-                                <div class="mt-4">
-                                    <div class="info-box bg-gradient-warning">
-                                        <span class="info-box-icon">
-                                            <i class="fas fa-money-bill-wave"></i>
-                                        </span>
-                                        <div class="info-box-content">
-                                            <span class="info-box-text">
-                                                <h5 class="text-bold text-dark mb-0">Recompensa</h5>
-                                            </span>
-                                            <span class="info-box-number text-dark" id="reward"></span>
-                                            <div class="progress">
-                                                <div class="progress-bar" style="width: 100%"></div>
-                                            </div>
-                                            <span class="progress-description text-dark">
-                                                Se pagó esta cantidad después de haberla completado y enviarla a la empresa 
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-        
-                                <!-- Task Info Boxes -->
-                                <div class="row mt-4">
-                                    <!-- Date Info Box -->
-                                    <div class="col-md-6">
-                                        <div class="info-box bg-gradient-info">
-                                            <span class="info-box-icon">
-                                                <i class="far fa-calendar-alt"></i>
-                                            </span>
-                                            <div class="info-box-content">
-                                                <span class="info-box-text text-bold">Fecha</span>
-                                                <span class="info-box-number" id="taskDate"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-        
-                                    <!-- Duration Info Box -->
-                                    <div class="col-md-6">
-                                        <div class="info-box bg-gradient-success">
-                                            <span class="info-box-icon">
-                                                <i class="far fa-clock"></i>
-                                            </span>
-                                            <div class="info-box-content">
-                                                <span class="info-box-text text-bold">Duración estimada</span>
-                                                <span class="info-box-number" id="taskDuration"></span>
-                                                <span class="info-box-text" id="taskPrice"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-        
-                                <!-- Company Info -->
-                                <div class="mt-4">
-                                    <div class="card card-widget widget-user-2">
-                                        <div class="card-header">
-                                            <h5 class="text-bold">
-                                                <i class="fas fa-building mr-2"></i>
-                                            </h5>
-                                            <span class="info-box-number" id="nombre_empresa"></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-        
-                    <!-- Modal Footer -->
-                    <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">
-                            <i class="fas fa-times mr-2"></i>
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endif
     </body>
 @stop
 
@@ -232,50 +124,76 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-$(document).ready(function() {
-    $('.view-task-button').on('click', function() {
-        let taskId = $(this).data('id'); // Obtener el id de la tarea
+        $(document).ready(function() {
+            $('.view-task-button').on('click', function() {
+                let taskId = $(this).data('id'); // Obtener el id de la tarea
 
-        // Generar la URL sin duplicar el prefijo usando el helper de Laravel
-        let url = "{{ route('tareas.detalle', ['id' => ':id']) }}".replace(':id', taskId);
+                // Generar la URL usando el helper de Laravel
+                let url = "{{ route('tareas.detalle', ['id' => ':id']) }}".replace(':id', taskId);
 
-        // Realizar la solicitud AJAX para obtener los detalles de la tarea
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function(response) {
-                // Llenar el modal con los datos obtenidos de la respuesta
-                $('#taskTitle').text(response.title);
-                $('#taskDescription').text(response.description);
-                
-                // Formatear las fechas
-                const startDate = new Date(response.start_date);
-                const endDate = new Date(response.end_date);
-                
-                const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-                const formattedStartDate = startDate.toLocaleDateString('es-ES', options);
-                const formattedEndDate = endDate.toLocaleDateString('es-ES', options);
-                
-                $('#taskDate').text(`${formattedStartDate} - ${formattedEndDate}`);
-                
-                // Calcular la duración en días
-                const durationInDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
-                $('#taskDuration').text(`${durationInDays} días`);
+                // Realizar la solicitud AJAX para obtener los detalles de la tarea
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        // Formatear las fechas
+                        const startDate = new Date(response.start_date);
+                        const endDate = new Date(response.end_date);
+                        
+                        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+                        const formattedStartDate = startDate.toLocaleDateString('es-ES', options);
+                        const formattedEndDate = endDate.toLocaleDateString('es-ES', options);
+                        
+                        // Calcular la duración en días
+                        const durationInDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
-                $('#nombre_empresa').text(response.nombre_empresa);
-                $('#taskPrice').text(response.price);
-                $('#taskLocation').text(response.location);
-                $('#reward').text(response.reward);
-                $('#location_empresa').text(response.location_empresa);
-
-                $('#taskDetailModal').modal('show');
-            },
-            error: function() {
-                alert('Error al obtener los detalles de la tarea');
-            }
+                        // Mostrar los detalles de la tarea en SweetAlert
+                        Swal.fire({
+                            title: `<h3 style="text-align:left;">${response.title}</h3>`,
+                            html: `
+                                <div style="text-align:left; line-height:1.5;">
+                                    <h5 class="text-bold">
+                                        <i class="fas fa-file-alt mr-2"></i>
+                                        Descripción
+                                    </h5>
+                                    <p class="text-muted">${response.description}</p>
+                                    <h5 class="text-bold">
+                                        <i class="fas fa-money-bill-wave mr-2"></i>
+                                        Recompensa
+                                    </h5>
+                                    <p class="text-dark">${response.reward}</p>
+                                    <h5 class="text-bold">
+                                        <i class="far fa-calendar-alt mr-2"></i>
+                                        Fecha
+                                    </h5>
+                                    <p>${formattedStartDate} - ${formattedEndDate}</p>
+                                    <h5 class="text-bold">
+                                        <i class="far fa-clock mr-2"></i>
+                                        Duración Estimada
+                                    </h5>
+                                    <p>${durationInDays} días</p>
+                                    <h5 class="text-bold">
+                                        <i class="fas fa-building mr-2"></i>
+                                        Empresa
+                                    </h5>
+                                    <p>${response.nombre_empresa}</p>
+                                    <h5 class="text-bold">
+                                        <i class="fas fa-map-marker-alt mr-2"></i>
+                                        Ubicación
+                                    </h5>
+                                    <p>${response.location}</p>
+                                </div>
+                            `,
+                            showCloseButton: true,
+                            confirmButtonText: 'Cerrar',
+                            width: '600px',
+                        });
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Error al obtener los detalles de la tarea', 'error');
+                    }
+                });
+            });
         });
-    });
-});
-
     </script>
 @stop
